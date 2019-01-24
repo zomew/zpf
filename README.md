@@ -1,5 +1,5 @@
-# zpf
-Zomew PHP framework, 一个原自用按需加载PHP框架，可自由扩展，包含mysql/redis/mongodb常用模块
+# Zomew PHP framework
+Zomew PHP framework(zpf), 一个原自用按需加载PHP框架，可自由扩展，包含mysql/redis/mongodb常用模块
 
 如果有任何使用上的不便，欢迎批评指教。
 
