@@ -94,5 +94,35 @@
                     'sslkey' => '',
                 ),
             );
+
+            /**
+             * 演示配置数据（详见\self\Cls_PackDemo.php）
+             * @var array
+             */
+            public static $SELF_CONFIG = array(
+                'db' => array(
+                    'hostname' => '127.0.0.1',
+                    'username' => 'username',
+                    'password' => 'password',
+                    'database' => 'dbname',
+                    'port'     => 3306,
+                    'prefix'   => 'zf_',
+                    'pconnect' => false,
+                    'charset'  => 'utf8',
+                ),
+                'redis' => array(
+                    'host' => '127.0.0.1',
+                    'port' => 6379,
+                    'pass' => '',
+                    'db' => 0,
+                ),
+                'mongodb' => array(
+                    'hostname' => '127.0.0.1',
+                    'username' => 'username',
+                    'password' => 'password',
+                    'database' => 'dbname',
+                    'port'     => '',
+                ),
+            );
         }
     }

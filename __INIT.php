@@ -22,21 +22,30 @@ if (!defined("RUN_ENV")) {
 }
 
 function autoload($cls) {
+    $base_list = array(
+        'class',
+        'self',
+    );
     $base = 'class'.DIRECTORY_SEPARATOR;
     $libs = array(
         'smarty' => 'libs/Smarty-3.1.30/Smarty.class.php',
         'qrcode' => 'libs/phpqrcode/phpqrcode.php',
     );
     $name = trim(strtolower($cls),' \\');
+    $file = '';
     if (isset($libs[$name])) {
         $file = ZF_ROOT  . $base . $libs[strtolower($cls)];
     }else{
-        $a = explode('\\',$cls);
-        $a[count($a)-1] = 'Cls_'.ucfirst($a[count($a)-1]);
-        $file = ZF_ROOT . $base . implode(DIRECTORY_SEPARATOR,$a) . '.php';
+        foreach($base_list as $v) {
+            $base = $v . DIRECTORY_SEPARATOR;
+            $a = explode('\\', $cls);
+            $a[count($a) - 1] = 'Cls_' . ucfirst($a[count($a) - 1]);
+            $file = ZF_ROOT . $base . implode(DIRECTORY_SEPARATOR, $a) . '.php';
+            if (file_exists($file)) break;
+        }
     }
 
-    if (file_exists($file)) {
+    if ($file && file_exists($file)) {
         include_once($file);
     }
     return true;
