@@ -406,7 +406,7 @@ class Pdomysql
      */
     public function getSql($tbName = '') {
         $tbName = $this->getTablename($tbName);
-        $sql = "select " . trim($this->_field) . " from `" . $tbName . "` " . trim($this->_where) . " " . trim($this->_order) . " " . trim($this->_group) . " " . trim($this->_limit);
+        $sql = "select " . trim($this->_field) . " from `" . $tbName . "` " . trim($this->_where) . " " . trim($this->_group) . " " . trim($this->_order) . " " . trim($this->_limit);
         foreach ($this->_where_array as $k => $v) {
             $sql = str_replace(':'.$k.' ',"'".str_replace("'","\'",$v)."' ",$sql);
         }
