@@ -513,6 +513,29 @@ Class Common {
     }
 
     /**
+     * 隐藏数组数据中的电话号码
+     * @since 2019.02.16
+     *
+     * @param array $data
+     * @param string $field
+     * @return array
+     */
+    public static function PhoneMaskArray($data = array(), $field = '') {
+        $ret = $data;
+        if ($data && $field) {
+            if (is_string($field)) $field = explode(',', $field);
+            if ($field && is_array($field)) {
+                foreach($ret as $k => $v) {
+                    foreach($field as $n) {
+                        if (isset($v[$n]) && is_string($v[$n])) $ret[$k][$n] = self::PhoneMask($v[$n]);
+                    }
+                }
+            }
+        }
+        return $ret;
+    }
+
+    /**
      * 创建随机字符串
      * @since 2018.11.09
      *
