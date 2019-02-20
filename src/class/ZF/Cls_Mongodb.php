@@ -397,4 +397,91 @@ class Mongodb {
             }
         }
     }
+
+    /**
+     * 统计筛选记录条数（相对于查询交互数据更少，效率更高，用于不需要数据集的情况）
+     * @since 2019.02.20
+     *
+     * @param string $collectionName
+     * @param array $command
+     * @param string $databaseName
+     * @return bool
+     */
+    public function count($collectionName = '', $command = array(), $databaseName = '') {
+        $ret = false;
+        if ($collectionName && $command) {
+            $this->checkConnect();
+            $raw = array(
+                'count' => 'logs',
+                'query' => array(),
+            );
+            if (isset($command['count']) && isset($command['query'])) {
+                $command = array_merge($raw, $command);
+            }else{
+                $raw['query'] = $command;
+                $command = $raw;
+            }
+            if ($collectionName) $command['count'] = $collectionName;
+            if ($databaseName == '') $databaseName = $this->_dbname;
+            $cmd = new \MongoDB\Driver\Command($command);
+            try {
+                $r = $this->manager->executeReadCommand($databaseName, $cmd);
+                if ($r) {
+                    $tmp = $r->toArray()[0];
+                    if ($tmp && is_object($tmp) && property_exists($tmp, 'n')) $ret = $tmp->n;
+                }
+            }catch (\MongoDB\Driver\Exception $e) {
+                exit($e->__toString());
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * MongoDB原生去重，不能排序，需要排序建议使用aggregate
+     * @since 2019.02.20
+     *
+     * @param string $collectionName
+     * @param array $command
+     * @param string $key
+     * @param string $databaseName
+     * @return array
+     */
+    public function distinct($collectionName = '', $command = array(), $key = '', $databaseName = '') {
+        $ret = array();
+        if ($collectionName && $command) {
+            $this->checkConnect();
+            $raw = array(
+                __FUNCTION__ => 'logs',
+                'key' => "",
+                'query' => array(),
+            );
+            if (isset($command[__FUNCTION__]) && isset($command['query'])) {
+                $command = array_merge($raw, $command);
+            } else {
+                if ($key && is_string($key)) {
+                    $raw['query'] = $command;
+                    $command = $raw;
+                }
+            }
+            if (!isset($command[__FUNCTION__])) $command = array_merge(array(__FUNCTION__ => 'logs',), $command);
+            if ($collectionName) $command[__FUNCTION__] = $collectionName;
+            if ($databaseName == '') $databaseName = $this->_dbname;
+            if ($command['key']) {
+                $cmd = new \MongoDB\Driver\Command($command);
+                try {
+                    $r = $this->manager->executeReadCommand($databaseName, $cmd);
+                    if ($r) {
+                        $tmp = $r->toArray();
+                        if (isset($tmp[0]) && is_object($tmp[0]) && property_exists($tmp[0], 'values')) $ret = $tmp[0]->values;
+                    }
+                } catch (\MongoDB\Driver\Exception $e) {
+                    exit($e->__toString());
+                }
+            } else {
+                trigger_error('distinct keys is not set');
+            }
+        }
+        return $ret;
+    }
 }
