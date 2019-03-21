@@ -218,7 +218,11 @@ class __BASE {
         $ret = null;
         if ($name && is_string($name)) {
             $ref = new \ReflectionClass($name);
-            $ret = $ref->newInstanceArgs($param);
+            if ($ref->isInstantiable()) {
+                $ret = $ref->newInstanceArgs($param);
+            } else {
+                trigger_error("'{$name}' can't instantiable!");
+            }
         }
         return $ret;
     }
