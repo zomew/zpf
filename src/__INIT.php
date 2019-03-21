@@ -27,10 +27,12 @@ function autoload($cls) {
         'self',
     );
     $base = 'class'.DIRECTORY_SEPARATOR;
-    $libs = array(
-        'smarty' => 'libs/Smarty-3.1.30/Smarty.class.php',
-        'qrcode' => 'libs/phpqrcode/phpqrcode.php',
-    );
+    $libs = array();
+    if (file_exists(ZF_ROOT . 'static_libs.php')) {
+        $libs = require(ZF_ROOT . 'static_libs.php');
+    } else if (file_exists(ZF_ROOT . 'static_libs.example.php')) {
+        $libs = require(ZF_ROOT . 'static_libs.example.php');
+    }
     $name = trim(strtolower($cls),' \\');
     $file = '';
     if (isset($libs[$name])) {
@@ -52,6 +54,9 @@ function autoload($cls) {
 }
 
 spl_autoload_register('autoload');
+
+$composer_autoload = ZF_ROOT . 'vendor/autoload.php';
+if (file_exists($composer_autoload)) include_once($composer_autoload);
 
 /*if (!class_exists("\CONFIG") || !isset(\CONFIG::$debug) || !\CONFIG::$debug) {
     error_reporting(0);
