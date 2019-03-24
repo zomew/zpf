@@ -10,40 +10,48 @@ namespace ZF;
 
 /**
  * MongoDB操作类，原生的和官方的第三方类操作起来太麻烦了，手工封装一个吧
- * @author Jamers <jamersnox@zomew.net>
- * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2018.09.07
  *
- * Class Mongodb
  * @package ZF
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2018.09.07
  */
-class Mongodb {
+class Mongodb
+{
     /**
      * MongoDB连接对象
+     * 
      * @var \MongoDB\Driver\Manager
      */
     public $manager;
     /**
      * 数据库名称
+     * 
      * @var string
      */
     private $_dbname;
     /**
      * 数据库连接字符串
+     * 
      * @var string
      */
     private $_config;
     /**
      * 最后断线检查时间
+     * 
      * @var int
      */
     private $_check_time = 0;
 
     /**
      * 连接MongoDB
-     * @param string $conf
+     * 
+     * @param string $conf 
+     * 
+     * @return void
      */
-    public function ConnectMongodb($conf = '') {
+    public function connectMongodb($conf = '')
+    {
         if ($conf && is_string($conf)) {
             $this->_config = $conf;
         }
@@ -61,29 +69,39 @@ class Mongodb {
      * 初始化MongoDB类，配置参数可使用连接字符串或者数组
      *
      * Mongodb constructor.
-     * @param string $conf
+     * 
+     * @param string $conf 
      */
-    public function __construct($conf = ''){
-        class_exists('\MongoDB\Driver\Manager') or die('MongoDB class is not exists.');
-        $this->LoadConfig();
+    public function __construct($conf = '')
+    {
+        class_exists('\MongoDB\Driver\Manager') 
+            or die('MongoDB class is not exists.');
+        $this->loadConfig();
         if (!$conf) {
-            if (isset(\Config::$mongodb) && \Config::$mongodb) $conf = \Config::$mongodb;
+            if (isset(\Config::$mongodb) && \Config::$mongodb) {
+                $conf = \Config::$mongodb;
+            }
         }
         if (is_array($conf)) {
-            $conf = $this->BuildDSN($conf);
-        }else if (is_string($conf)) {
-        }else{
+            $conf = $this->buildDSN($conf);
+        } else if (is_string($conf)) {
+        } else {
             $conf = 'mongodb://localhost:27017/';
         }
-        if (is_null($this->manager)) $this->ConnectMongodb($conf);
+        if (is_null($this->manager)) {
+            $this->connectMongodb($conf);
+        }
     }
 
     /**
      * 组织集合名称
-     * @param string $name
+     * 
+     * @param string $name 
+     * 
      * @return string
      */
-    public function getCollectionName($name = '') {
+    public function getCollectionName($name = '')
+    {
         $ret = $name;
         if ($name && is_string($name)) {
             if (!preg_match('/^\s*' . $this->_dbname . '\..*$/i', $name)) {
@@ -95,8 +113,12 @@ class Mongodb {
 
     /**
      * 加载默认配置文件
+     *
+     * @return void
+     * @since  2019.03.23
      */
-    public function LoadConfig() {
+    public function loadConfig()
+    {
         if (!class_exists('\Config')) {
             $uname = php_uname('n');
             $config = array(
@@ -104,9 +126,9 @@ class Mongodb {
                 ZF_ROOT.'config.php',
                 ZF_ROOT.'config.example.php',
             );
-            foreach($config as $v) {
+            foreach ($config as $v) {
                 if (file_exists($v)) {
-                    include_once($v);
+                    include_once $v;
                     break;
                 }
             }
@@ -116,21 +138,26 @@ class Mongodb {
     /**
      * 将数组转换成连接字符串
      *
-     * @param array $conf
+     * @param array $conf 
+     * 
      * @return string
      */
-    public function BuildDSN($conf = array()) {
+    public function buildDSN($conf = array())
+    {
         $ret = 'mongodb://localhost:27017/';
         if ($conf && is_array($conf)) {
             $ret = 'mongodb://(@auth@)(@host@)/(@options@)';
             $ary = array('host' => 'localhost');
-            if (isset($conf['username']) && $conf['username']) $ary['auth'] = $conf['username'].':'.(isset($conf['password'])?$conf['password']:'').'@';
+            if (isset($conf['username']) && $conf['username']) {
+                $ary['auth'] = $conf['username'].':' .
+                    (isset($conf['password'])?$conf['password']:'').'@';
+            }
             if (isset($conf['hostname'])) {
                 $port = array();
                 if (isset($conf['port']) && $conf['port']) {
                     if (is_string($conf['port'])) {
                         $port = explode(',', $conf['port']);
-                    }else if (is_array($conf['port'])) {
+                    } else if (is_array($conf['port'])) {
                         $port = $conf['port'];
                     }
                 }
@@ -138,8 +165,8 @@ class Mongodb {
                 $list = array();
                 if (isset($conf['hostname']) && $conf['hostname']) {
                     if (is_string($conf['hostname'])) {
-                        $host = explode(',',$conf['hostname']);
-                    }else if (is_array($conf['hostname'])) {
+                        $host = explode(',', $conf['hostname']);
+                    } else if (is_array($conf['hostname'])) {
                         $host = $conf['hostname'];
                     }
                 }
@@ -147,7 +174,7 @@ class Mongodb {
                     foreach ($host as $k => $v) {
                         if ($v && is_string($v)) {
                             $p = '';
-                            if ($port){
+                            if ($port) {
                                 if (count($port) == 1) {
                                     $p = $port[0];
                                 } else if (isset($port[$k])) {
@@ -156,20 +183,26 @@ class Mongodb {
                             }
                             if ($p) {
                                 $list[] = $v.':'.$p;
-                            }else{
+                            } else {
                                 $list[] = $v;
                             }
                         }
                     }
-                    if ($list) $ary['host'] = implode(',',$list);
+                    if ($list) {
+                        $ary['host'] = implode(',', $list);
+                    }
                 }
             }
             if (isset($conf['database']) && $conf['database']) {
                 $ary['database'] = $conf['database'];
                 $this->_dbname = $conf['database'];
             }
-            if (isset($conf['options']) && $conf['options'] && is_string($conf['options'])) $ary['options'] = '?'.$conf['options'];
-            $ret = \ZF\Common::SpecialReplace($ret,$ary);
+            if (isset($conf['options']) && $conf['options']
+                && is_string($conf['options'])
+            ) {
+                $ary['options'] = '?'.$conf['options'];
+            }
+            $ret = \ZF\Common::SpecialReplace($ret, $ary);
         }
         return $ret;
     }
@@ -376,7 +409,7 @@ class Mongodb {
                 $ok = false;
             }
             if (!$ok) {
-                $this->ConnectMongodb();
+                $this->connectMongodb();
             }
         }
     }

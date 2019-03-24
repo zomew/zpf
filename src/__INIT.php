@@ -3,15 +3,18 @@
 
 /**
  * 动态调用初始化文件
- * @author Jamers <jamersnox@zomew.net>
+ *
+ * @author  Jamers <jamersnox@zomew.net>
  * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2017.12.26
+ * @since   2017.12.26
  */
 if (!defined("ZF_ROOT")) {
-    define("ZF_ROOT",dirname(__FILE__).DIRECTORY_SEPARATOR);
+    define("ZF_ROOT", dirname(__FILE__) . DIRECTORY_SEPARATOR);
 }
 
-if (defined('STDIN')) chdir(dirname(__FILE__));
+if (defined('STDIN')) {
+    chdir(dirname(__FILE__));
+}
 
 if (!defined("RUN_ENV")) {
     $run_env = getenv("RUN_ENV");
@@ -21,7 +24,16 @@ if (!defined("RUN_ENV")) {
     define('RUN_ENV', $run_env);
 }
 
-function autoload($cls) {
+/**
+ * 自动加载函数
+ *
+ * @param string $cls classname
+ *
+ * @return bool
+ * @since  2019.03.23
+ */
+function autoload($cls)
+{
     $base_list = array(
         'class',
         'self',
@@ -29,26 +41,28 @@ function autoload($cls) {
     $base = 'class'.DIRECTORY_SEPARATOR;
     $libs = array();
     if (file_exists(ZF_ROOT . 'static_libs.php')) {
-        $libs = require(ZF_ROOT . 'static_libs.php');
+        $libs = include ZF_ROOT . 'static_libs.php';
     } else if (file_exists(ZF_ROOT . 'static_libs.example.php')) {
-        $libs = require(ZF_ROOT . 'static_libs.example.php');
+        $libs = include ZF_ROOT . 'static_libs.example.php';
     }
-    $name = trim(strtolower($cls),' \\');
+    $name = trim(strtolower($cls), ' \\');
     $file = '';
     if (isset($libs[$name])) {
         $file = ZF_ROOT  . $base . $libs[strtolower($cls)];
-    }else{
-        foreach($base_list as $v) {
+    } else {
+        foreach ($base_list as $v) {
             $base = $v . DIRECTORY_SEPARATOR;
             $a = explode('\\', $cls);
             $a[count($a) - 1] = 'Cls_' . ucfirst($a[count($a) - 1]);
             $file = ZF_ROOT . $base . implode(DIRECTORY_SEPARATOR, $a) . '.php';
-            if (file_exists($file)) break;
+            if (file_exists($file)) {
+                break;
+            }
         }
     }
 
     if ($file && file_exists($file)) {
-        include_once($file);
+        include_once $file;
     }
     return true;
 }
@@ -56,7 +70,9 @@ function autoload($cls) {
 spl_autoload_register('autoload');
 
 $composer_autoload = ZF_ROOT . 'vendor/autoload.php';
-if (file_exists($composer_autoload)) include_once($composer_autoload);
+if (file_exists($composer_autoload)) {
+    include_once $composer_autoload;
+}
 
 /*if (!class_exists("\CONFIG") || !isset(\CONFIG::$debug) || !\CONFIG::$debug) {
     error_reporting(0);

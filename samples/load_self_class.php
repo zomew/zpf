@@ -7,7 +7,7 @@
  * File: test_self.php
  */
 
-include_once("../src/__INIT.php");
+require_once '../src/__INIT.php';
 
 //\Demo::hello();
 

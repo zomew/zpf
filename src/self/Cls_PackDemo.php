@@ -7,51 +7,70 @@
  * File: Cls_PackDemo.php
  */
 
-class PackDemo extends \ZF\Entity {
+/**
+ * Class PackDemo
+ *
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2019.01.25
+ */
+class PackDemo extends \ZF\Entity
+{
     /**
      * 演示自动加载配置名
+     *
      * @var string
      */
     protected static $config_head = 'self';
 
     /**
      * 静态调用数据库对象
+     *
      * @var \ZF\Pdomysql
      */
     public static $sdb = null;
 
     /**
      * 静态调用Redis对象
+     *
      * @var \ZF\Redislock
      */
     public static $srl = null;
 
     /**
      * 静态调用MongoDB对象
+     *
      * @var \ZF\Mongodb
      */
     public static $smd = null;
 
     /**
      * 是否已实例化
+     *
      * @var bool
      */
-    private static $is_construct = false;
+    private static $_is_construct = false;
 
     /**
      * 对象初始化
      * Mixing constructor.
      */
-    public function __construct() {
-        self::$is_construct = true;
+    public function __construct()
+    {
+        self::$_is_construct = true;
         \ZF\Common::LoadConfig();
     }
 
     /**
      * 连接数据库
-     * @param array|string $conf
+     *
+     * @param array $conf 连接信息
+     *
+     * @return void
+     * @since  2018.12.10
      */
-    protected function ConnectDB($conf = array()) {
+    protected function connectDB($conf = array())
+    {
         if (!$this->db) {
             if ($conf == array()) {
                 $conf = \ZF\Common::LoadConfigData(self::$config_head, 'db');
@@ -64,13 +83,16 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 静态方式连接数据库
-     * @since 2018.12.10
      *
-     * @param array $conf
-     * @param bool $alone
+     * @param array $conf  连接信息
+     * @param bool  $alone 是否重建
+     *
      * @return \ZF\Pdomysql
+     * @static
+     * @since  2018.12.10
      */
-    public static function sConnectDB($conf = array(), $alone = false) {
+    public static function sConnectDB($conf = array(), $alone = false)
+    {
         $ret = self::$sdb;
         if (!self::$sdb || $alone) {
             if ($conf == array()) {
@@ -90,8 +112,12 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 断开数据库连接
+     *
+     * @return void
+     * @since  2018.12.10
      */
-    protected function DisConnectDB() {
+    protected function disConnectDB()
+    {
         if ($this->db) {
             $this->db->close();
             $this->db = null;
@@ -100,10 +126,13 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 静态方式断开数据库连接
-     * @since 2018.12.10
      *
+     * @return void
+     * @static
+     * @since  2018.12.10
      */
-    public static function sDisConnectDB() {
+    public static function sDisConnectDB()
+    {
         if (self::$sdb) {
             self::$sdb->close();
             self::$sdb = null;
@@ -112,11 +141,14 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 连接Redis
-     * @since 2018.11.08
      *
-     * @param array $conf
+     * @param array $conf 连接信息
+     *
+     * @return void
+     * @since  2018.11.08
      */
-    protected function ConnectRedis($conf = array()) {
+    protected function connectRedis($conf = array())
+    {
         if (!$this->rl) {
             if ($conf == array()) {
                 $conf = \ZF\Common::LoadConfigData(self::$config_head, 'redis');
@@ -129,13 +161,16 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 静态方式连接Redis
-     * @since 2018.12.10
      *
-     * @param array $conf
-     * @param bool $alone
+     * @param array $conf  连接信息
+     * @param bool  $alone 是否重建
+     *
      * @return \ZF\Redislock
+     * @static
+     * @since  2018.12.10
      */
-    public static function sConnectRedis($conf = array(), $alone = false) {
+    public static function sConnectRedis($conf = array(), $alone = false)
+    {
         $ret = self::$srl;
         if (!self::$srl || $alone) {
             if ($conf == array()) {
@@ -155,9 +190,12 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 断开Redis连接
-     * @since 2018.11.08
+     *
+     * @return void
+     * @since  2018.11.08
      */
-    protected function DisConnectRedis() {
+    protected function disConnectRedis()
+    {
         if ($this->rl) {
             $this->rl->redis->close();
             $this->rl = null;
@@ -166,10 +204,13 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 静态方式断开Redis连接
-     * @since 2018.12.10
      *
+     * @return void
+     * @static
+     * @since  2018.12.10
      */
-    public static function sDisConnectRedis() {
+    public static function sDisConnectRedis()
+    {
         if (self::$srl) {
             self::$srl->redis->close();
             self::$srl = null;
@@ -178,11 +219,14 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 连接MongoDB实例化方法
-     * @since 2018.12.25
      *
-     * @param array $conf
+     * @param array $conf 连接信息
+     *
+     * @return void
+     * @since  2018.12.25
      */
-    protected function ConnectMongoDB($conf = array()) {
+    protected function connectMongoDB($conf = array())
+    {
         if (!$this->md) {
             if ($conf == array()) {
                 $conf = \ZF\Common::LoadConfigData(self::$config_head, 'mongodb');
@@ -193,13 +237,16 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 静态方式连接MongoDB
-     * @since 2018.12.25
      *
-     * @param array $conf
-     * @param bool $alone
-     * @return null|\ZF\Mongodb
+     * @param array $conf  连接信息
+     * @param bool  $alone 是否重建
+     *
+     * @return \ZF\Mongodb
+     * @static
+     * @since  2018.12.25
      */
-    public static function sConnectMongoDB($conf = array(), $alone = false) {
+    public static function sConnectMongoDB($conf = array(), $alone = false)
+    {
         $ret = self::$smd;
         if (!self::$smd) {
             if ($conf == array()) {
@@ -217,10 +264,12 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 断开MongoDB连接
-     * @since 2018.12.25
      *
+     * @return void
+     * @since  2018.12.25
      */
-    protected function DisConnectMongoDB() {
+    protected function disConnectMongoDB()
+    {
         if ($this->md) {
             $this->md = null;
         }
@@ -228,10 +277,13 @@ class PackDemo extends \ZF\Entity {
 
     /**
      * 静态方式断开MongoDB连接
-     * @since 2018.12.25
      *
+     * @return void
+     * @static
+     * @since  2018.12.25
      */
-    public static function sDisConnectMongoDB() {
+    public static function sDisConnectMongoDB()
+    {
         if (self::$smd) {
             self::$smd = null;
         }

@@ -10,57 +10,70 @@ namespace ZF;
 
 /**
  * Redis锁以及相关便捷操作模块
- * @author Jamers <jamersnox@zomew.net>
- * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2018.06.05
- *
- * Class Redislock
  *
  * @package ZF
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2018.06.05
  */
-class Redislock {
+class Redislock
+{
     /**
-     * redis对象，可以用于进行原生操作
+     * Redis对象，可以用于进行原生操作
+     * 
      * @var \Redis
      */
     public $redis;
 
     /**
      * 原始连接信息
+     * 
      * @var array
      */
-    private $conn;
+    private $_conn;
 
     /**
      * Redislock constructor.
      * 初始化类，并创建连接
      *
-     * @param array $config
+     * @param array $config 
      */
-    public function __construct($config = array()){
+    public function __construct($config = array())
+    {
         Common::LoadConfig();
-        if (!$config && isset(\Config::$redis) && \Config::$redis) $config = \Config::$redis;
-        //ini_set('default_socket_timeout', -1);
-        $conn = array('host' => '127.0.0.1', 'port' => 6379, 'pass' => '', 'db' => 1,);
-        if (isset($config)) $conn = array_merge($conn, $config);
-        $this->conn = $conn;
+        if (!$config && isset(\Config::$redis) && \Config::$redis) {
+            $config = \Config::$redis;
+        }
+        $conn = array(
+            'host' => '127.0.0.1', 
+            'port' => 6379, 
+            'pass' => '',
+            'db' => 1,
+        );
+        if (isset($config)) {
+            $conn = array_merge($conn, $config);
+        }
+        $this->_conn = $conn;
         $this->redis = new \Redis();
-        if ($this->redis->connect($conn['host'],$conn['port'])) {
+        if ($this->redis->connect($conn['host'], $conn['port'])) {
             if ($conn['pass']) {
                 if (!$this->redis->auth($conn['pass'])) {
                     exit('Redis password is wrong;');
                 }
             }
             $this->redis->select($conn['db']);
-        }else{
+        } else {
             exit('Redis connect info wrong!');
         }
     }
 
     /**
      * 检查连接是否已断，如果已断重连
+     * 
+     * @return void
      */
-    public function checkconn() {
+    public function checkconn()
+    {
         try {
             $is_dis = false;
             $ping = strtoupper($this->redis->ping());
@@ -71,15 +84,15 @@ class Redislock {
             $is_dis = true;
         }
         if ($is_dis) {
-            $conn = $this->conn;
-            if ($this->redis->connect($conn['host'],$conn['port'])) {
+            $conn = $this->_conn;
+            if ($this->redis->connect($conn['host'], $conn['port'])) {
                 if ($conn['pass']) {
                     if (!$this->redis->auth($conn['pass'])) {
                         exit('Redis password is wrong;');
                     }
                 }
                 $this->redis->select($conn['db']);
-            }else{
+            } else {
                 exit('Redis connect info wrong!');
             }
         }
@@ -87,19 +100,22 @@ class Redislock {
 
     /**
      * 获取锁
-     * @param  String  $key    锁标识
-     * @param  Int     $expire 锁过期时间
+     * 
+     * @param String $key    锁标识
+     * @param Int    $expire 锁过期时间
+     * 
      * @return Boolean
      */
-    public function lock($key, $expire=5){
+    public function lock($key, $expire = 5)
+    {
         $this->checkconn();
         $is_lock = $this->redis->setnx($key, time()+$expire);
         // 不能获取锁
-        if(!$is_lock){
+        if (!$is_lock) {
             // 判断锁是否过期
             $lock_time = $this->redis->get($key);
             // 锁已过期，删除锁，重新获取
-            if(time()>$lock_time){
+            if (time()>$lock_time) {
                 $this->unlock($key);
                 $is_lock = $this->redis->setnx($key, time()+$expire);
             }
@@ -109,31 +125,40 @@ class Redislock {
 
     /**
      * 释放锁
-     * @param  String  $key 锁标识
+     * 
+     * @param String $key 锁标识
+     * 
      * @return Boolean
      */
-    public function unlock($key){
+    public function unlock($key)
+    {
         $this->checkconn();
         return $this->redis->del($key);
     }
 
     /**
-     * lPop原生操作封装
-     * @param $key
+     * LPop原生操作封装
+     * 
+     * @param string $key 
+     * 
      * @return string
      */
-    public function lPop($key) {
+    public function lPop($key)
+    {
         $this->checkconn();
         return $this->redis->lPop($key);
     }
 
     /**
-     * rPush原生操作封装
-     * @param $key
-     * @param $value
+     * $Push原生操作封装
+     * 
+     * @param string $key 
+     * @param string $value 
+     * 
      * @return bool|int
      */
-    public function rPush($key,$value) {
+    public function rPush($key, $value)
+    {
         $this->checkconn();
         return $this->redis->rPush($key, $value);
     }
@@ -141,14 +166,15 @@ class Redislock {
     /**
      * 检查Redis中还有多少个队列待处理
      *
-     * @param $key
+     * @param string $key 
+     * 
      * @return array
      */
-    public function CheckLoopNum($key) {
+    public function checkLoopNum($key)
+    {
         $this->checkconn();
         $list = $this->redis->hGetAll($key);
         $ret = array('count' => 0, 'list' => array(),'all' => 0,);
-        //$all = $this->redis->hGetAll('PROCESS_GET');        // array('PROCESS_1' => 'xxxxxxx_1')
         if ($list) {
             foreach ($list as $k => $v) {
                 $n = intval($v);
@@ -183,12 +209,14 @@ class Redislock {
     /**
      * Redis中rPush数组，加速redis操作，可配置批量处理数量，返回push进去的数量
      *
-     * @param string $key   键值
-     * @param array $ary    一维数据数组
-     * @param int $num      一次处理的数量，默认100
+     * @param string $key 键值
+     * @param array  $ary 一维数据数组
+     * @param int    $num 一次处理的数量，默认100
+     *
      * @return int
      */
-    public function rPushArray($key,$ary = array(),$num = 100) {
+    public function rPushArray($key,$ary = array(),$num = 100)
+    {
         $ret = 0;
         if ($key && is_string($key) && $ary && is_array($ary)) {
             $this->checkconn();
@@ -196,12 +224,14 @@ class Redislock {
             $cmd = '$ret += $this->redis->rPush($key, (@keys@));';
             foreach ($ary as $k => $v) {
                 if (count($list) >= $num) {
-                    eval(str_replace('(@keys@)',implode(', ',$list), $cmd));
+                    eval(str_replace('(@keys@)', implode(', ', $list), $cmd));
                     $list = array();
                 }
                 $list[] = '$ary["'.$k.'"]';
             }
-            if ($list) eval(str_replace('(@keys@)', implode(', ',$list),$cmd));
+            if ($list) {
+                eval(str_replace('(@keys@)', implode(', ', $list), $cmd));
+            }
         }
         return $ret;
     }
@@ -209,15 +239,17 @@ class Redislock {
     /**
      * 设置微信消息发送URL
      *
-     * @param $key
-     * @param $url
+     * @param string $key
+     * @param string $url
+     *
      * @return bool|int
      */
-    public function setWXMSGUrl($key,$url) {
+    public function setWXMSGUrl($key, $url)
+    {
         $ret = false;
         if ($key && $url && is_string($key) && is_string($url)) {
             $this->checkconn();
-            $ret = $this->redis->hSet('WEIXIN_MSG_SEND_URL',$key, $url);
+            $ret = $this->redis->hSet('WEIXIN_MSG_SEND_URL', $key, $url);
         }
         return $ret;
     }
@@ -225,15 +257,17 @@ class Redislock {
     /**
      * 设置消息发送标志
      *
-     * @param $key
-     * @param $url
+     * @param string $key
+     * @param string $url
+     *
      * @return bool|int
      */
-    public function setPROJECT($key,$url) {
+    public function setPROJECT($key,$url)
+    {
         $ret = false;
         if ($key && $url && is_string($key) && is_string($url)) {
             $this->checkconn();
-            $ret = $this->redis->hSet('MSG_PROJECT_TAG',$key, $url);
+            $ret = $this->redis->hSet('MSG_PROJECT_TAG', $key, $url);
         }
         return $ret;
     }
@@ -241,10 +275,12 @@ class Redislock {
     /**
      * 删除微信消息发送URL
      *
-     * @param $key
+     * @param string $key
+     *
      * @return bool|int
      */
-    public function delWXMSGUrl($key) {
+    public function delWXMSGUrl($key)
+    {
         $this->checkconn();
         return $this->redis->hDel('WEIXIN_MSG_SEND_URL', $key);
     }
@@ -252,10 +288,12 @@ class Redislock {
     /**
      * 删除发送标志
      *
-     * @param $key
+     * @param string $key
+     *
      * @return bool|int
      */
-    public function delPROJECT($key) {
+    public function delPROJECT($key)
+    {
         $this->checkconn();
         return $this->redis->hDel('MSG_PROJECT_TAG', $key);
     }
@@ -265,7 +303,8 @@ class Redislock {
      *
      * @return array
      */
-    public function getWXMSGUrl() {
+    public function getWXMSGUrl()
+    {
         $this->checkconn();
         return $this->redis->hGetAll('WEIXIN_MSG_SEND_URL');
     }
@@ -275,7 +314,8 @@ class Redislock {
      *
      * @return array
      */
-    public function getPROJECT() {
+    public function getPROJECT()
+    {
         $this->checkconn();
         return $this->redis->hGetAll('MSG_PROJECT_TAG');
     }
@@ -283,17 +323,21 @@ class Redislock {
     /**
      * 批量发送微信模板信息
      *
-     * @param string $url       发送链接
-     * @param array $ary        消息数据列表
-     * @param string $prj       发送消息项目标识
-     * @param int $single_num   单批次发送数量
+     * @param string $url        发送链接
+     * @param array  $ary        消息数据列表
+     * @param string $prj        发送消息项目标识
+     * @param int    $single_num 单批次发送数量
+     * 
+     * @return void
      */
-    public function BatchSendWXMSG($url, $ary = array(),$prj = 'JZ/Tpl', $single_num = 100) {
+    public function batchSendWXMSG($url, $ary = array(),
+        $prj = 'JZ/Tpl', $single_num = 100
+    ) {
         if ($url && $ary && is_array($ary)) {
             $this->checkconn();
             $key = 'LoopArray';
             if (isset(\Config::$part_key)) $key = \Config::$part_key;
-            $md5 = md5('time_' . microtime(true) . rand(100,999999));
+            $md5 = md5('time_' . microtime(true) . rand(100, 999999));
             $count = ceil(count($ary)/$single_num);
             $this->redis->hSet($key, $md5, strval($count));
             $this->setWXMSGUrl($md5, $url);
@@ -301,9 +345,9 @@ class Redislock {
             $c = 0;
             $l = 0;
             $list = array();
-            foreach($ary as $v) {
+            foreach ($ary as $v) {
                 if ($c>=$single_num) {
-                    $this->rPushArray("{$md5}_{$l}",$list);
+                    $this->rPushArray("{$md5}_{$l}", $list);
                     $l ++;
                     $c = 0;
                     $list = array();
@@ -312,7 +356,7 @@ class Redislock {
                 $c ++;
             }
             if ($list) {
-                $this->rPushArray("{$md5}_{$l}",$list);
+                $this->rPushArray("{$md5}_{$l}", $list);
             }
         }
     }
@@ -320,16 +364,19 @@ class Redislock {
     /**
      * 批量清除所有待发送信息
      *
-     * @param $key
+     * @param string $key 
+     * 
+     * @return void
      */
-    public function BatchCleanMSB($key) {
+    public function batchCleanMSB($key)
+    {
         $this->checkconn();
         $list = $this->redis->hGetAll($key);
         if ($list) {
             foreach ($list as $k => $v) {
                 $n = intval($v);
                 for ($i = 0; $i < $n; $i++) {
-                    $this->redis->lTrim("{$k}_{$i}",0,1);
+                    $this->redis->lTrim("{$k}_{$i}", 0, 1);
                     $this->redis->lPop("{$k}_{$i}");
                     $this->redis->del("P_{$k}_{$i}");
                 }
@@ -345,10 +392,12 @@ class Redislock {
     /**
      * 批量删除Hash键值
      *
-     * @param $keys array|string 需要删除hash键值的列表
+     * @param array|string $keys 需要删除hash键值的列表
+     * 
      * @return int 返回删除的hash内键值的总数量
      */
-    public function DelHashKeys($keys) {
+    public function delHashKeys($keys)
+    {
         $ret = 0;
         if ($keys) {
             $this->checkconn();
@@ -362,12 +411,12 @@ class Redislock {
                     $list = $this->redis->hKeys($key);
                     if ($list) {
                         $tmp = array();
-                        foreach($list as $k => $v) {
+                        foreach ($list as $k => $v) {
                             if ($v) {
                                 $tmp[$k] = "'{$v}'";
                             }
                         }
-                        eval(str_replace('(@keys@)',implode(', ',$tmp), $cmd));
+                        eval(str_replace('(@keys@)', implode(', ', $tmp), $cmd));
                     }
                 }
             }
@@ -377,37 +426,42 @@ class Redislock {
 
     /**
      * 手动设置Redis数据库ID，返回当前ID库
+     *
      * @param int $id
+     *
      * @return mixed
      */
-    public function selectdb($id = -1) {
+    public function selectdb($id = -1)
+    {
         if ($id != -1) {
             $id = intval($id);
             if ($id >= 0 && $id < 256) {
-                $this->conn['db'] = $id;
+                $this->_conn['db'] = $id;
                 $this->checkconn();
-                $this->redis->select($this->conn['db']);
+                $this->redis->select($this->_conn['db']);
             }
         }
-        return $this->conn['db'];
+        return $this->_conn['db'];
     }
 
     /**
      * 检查指定WID是否在批量发送消息
      *
      * @param int $wid
+     *
      * @return bool
      */
-    public function CheckSending($wid = 0) {
+    public function checkSending($wid = 0)
+    {
         $ret = false;
         if ($wid) {
             $list = $this->getWXMSGUrl();
             if ($list && is_array($list)) {
                 foreach ($list as $k => $v) {
                     $id = 0;
-                    if (stripos($v,'(@token@)') !== false) {
+                    if (stripos($v, '(@token@)') !== false) {
                         $id = 2;
-                    }else{
+                    } else {
                         if (preg_match('/\(@token_(\d+)@\)/i', $v, $m)) {
                             $id = intval($m[1]);
                         }

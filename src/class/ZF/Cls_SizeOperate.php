@@ -10,20 +10,20 @@ namespace ZF;
 
 /**
  * 存储单位操作运算类
- * @author Jamers <jamersnox@zomew.net>
- * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2018.07.05
  *
- * Class SizeOperate
  * @package ZF
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2018.07.05
  */
-class SizeOperate {
+class SizeOperate
+{
     /**
      * 存储单位列表，最小单位为byte
      *
      * @var array
      */
-    private static $unit = array(
+    private static $_unit = array(
         'B' => 0,
         'K' => 1,
         'M' => 2,
@@ -38,17 +38,24 @@ class SizeOperate {
     /**
      * 将容量转换在字节数
      *
-     * @param string $size
+     * @param string $size 
+     * 
      * @return string
      */
-    public static function Size2Byte($size = '1m') {
+    public static function size2Byte($size = '1m')
+    {
         $ret = '0';
         if ($size) {
-            $list = implode('',array_keys(self::$unit));
-            if (preg_match('/\s*([\d]+(?:\.[\d]+)?)(['.$list.']?)b?/i',strtoupper($size),$m)) {
+            $list = implode('', array_keys(self::$_unit));
+            if (preg_match(
+                '/\s*([\d]+(?:\.[\d]+)?)([' . $list . ']?)b?/i',
+                strtoupper($size),
+                $m
+            )
+            ) {
                 $ret = $m[1];
                 if ($m[2]) {
-                    $ret = bcmul($ret,bcpow('1024',self::$unit[$m[2]]));
+                    $ret = bcmul($ret, bcpow('1024', self::$_unit[$m[2]]));
                 }
             }
         }
@@ -58,19 +65,21 @@ class SizeOperate {
     /**
      * 将字节数转换成存储单位显示
      *
-     * @param string $bytes
+     * @param string $bytes 
+     * 
      * @return string
      */
-    public static function Byte2Unit($bytes = '0') {
+    public static function byte2Unit($bytes = '0')
+    {
         $ret = trim($bytes);
-        if (preg_match('/[\d]+/i',$ret)) {
-            $tmp = self::$unit;
+        if (preg_match('/[\d]+/i', $ret)) {
+            $tmp = self::$_unit;
             arsort($tmp);
-            foreach($tmp as $k => $v) {
-                $val = bcpow('1024',$v);
-                if (bccomp($ret,$val)>=0) {
-                    $t = bcdiv($ret,$val,4);
-                    $t = self::RoundLastScale($t);
+            foreach ($tmp as $k => $v) {
+                $val = bcpow('1024', $v);
+                if (bccomp($ret, $val) >= 0) {
+                    $t = bcdiv($ret, $val, 4);
+                    $t = self::_roundLastScale($t);
                     $ret = $t.$k;
                     break;
                 }
@@ -82,19 +91,30 @@ class SizeOperate {
     /**
      * 将最后一位小数四舍五入
      *
-     * @param string $str
+     * @param string $str 
+     * 
      * @return string
      */
-    private static function RoundLastScale($str = '0') {
+    private static function _roundLastScale($str = '0')
+    {
         $ret = $str;
-        if (preg_match('/^(\d+)\.(\d+)$/',$ret,$m)){
-            if (strlen($m[2])<=1 || preg_match('/^0+$/',$m[2])) {
+        if (preg_match('/^(\d+)\.(\d+)$/', $ret, $m)) {
+            if (strlen($m[2]) <= 1 || preg_match('/^0+$/', $m[2])) {
                 $ret = $m[1];
-                if (intval(substr($m[2],0,1))>=5) $ret = bcadd($ret,'1');
-            }else{
-                $ret = $m[1].'.'.substr($m[2],0,-1);
-                if (intval(substr($m[2],-1))>=5){
-                    $ret = rtrim(bcadd($ret,"0.".str_repeat('0',strlen($m[2])-2).'1',strlen($m[2])-1),'0');
+                if (intval(substr($m[2], 0, 1)) >= 5) {
+                    $ret = bcadd($ret, '1');
+                }
+            } else {
+                $ret = $m[1] . '.' . substr($m[2], 0, -1);
+                if (intval(substr($m[2], -1)) >= 5) {
+                    $ret = rtrim(
+                        bcadd(
+                            $ret,
+                            "0.".str_repeat('0', strlen($m[2]) - 2).'1',
+                            strlen($m[2])-1
+                        ),
+                        '0'
+                    );
                 }
             }
         }
@@ -104,23 +124,31 @@ class SizeOperate {
     /**
      * 存储单位加法运算，支持直接使用数组批量相加
      *
-     * @param string|array $left
-     * @param string $right
+     * @param string|array $left 
+     * @param string       $right 
+     * 
      * @return string
      */
-    public static function Size_Add($left,$right = '') {
+    public static function sizeAdd($left, $right = '')
+    {
         $ret = '0';
         if ($left && is_array($left)) {
             $tmp = '0';
-            foreach($left as $v) {
+            foreach ($left as $v) {
                 if ($v && is_string($v)) {
-                    $tmp = bcadd($tmp,self::Size2Byte($v));
+                    $tmp = bcadd($tmp, self::size2Byte($v));
                 }
             }
-            $ret = self::Byte2Unit($tmp);
-        }else{
-            if (is_string($left)) $ret = $left;
-            if (is_string($right) && $right) $ret = self::Byte2Unit(bcadd(self::Size2Byte($left),self::Size2Byte($right)));
+            $ret = self::byte2Unit($tmp);
+        } else {
+            if (is_string($left)) {
+                $ret = $left;
+            }
+            if (is_string($right) && $right) {
+                $ret = self::byte2Unit(
+                    bcadd(self::size2Byte($left), self::size2Byte($right))
+                );
+            }
         }
         return $ret;
     }
@@ -128,14 +156,22 @@ class SizeOperate {
     /**
      * 存储单位减法运算
      *
-     * @param string $left
-     * @param string $right
+     * @param string $left 
+     * @param string $right 
+     * 
      * @return int|string
      */
-    public static function Size_Sub($left = '',$right='') {
+    public static function sizeSub($left = '', $right='')
+    {
         $ret = 0;
-        if (is_string($left) && $left) $ret = $left;
-        if (is_string($right) && $right) $ret = self::Byte2Unit(bcsub(self::Size2Byte($left),self::Size2Byte($right)));
+        if (is_string($left) && $left) {
+            $ret = $left;
+        }
+        if (is_string($right) && $right) {
+            $ret = self::byte2Unit(
+                bcsub(self::size2Byte($left), self::size2Byte($right))
+            );
+        }
         return $ret;
     }
 }

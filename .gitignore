@@ -18,3 +18,4 @@ thumb/
 temp/
 Templates/
 docs/phpdoc-cache*
+tmp/

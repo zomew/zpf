@@ -12,23 +12,22 @@ namespace ZF;
 /**
  * 非常用编码方式Base16/32/91
  *
- * @author Jamers <jamersnox@zomew.net>
- * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2018.11.12
+ * @package   ZF
+ * @author    Jamers <jamersnox@zomew.net>
  * @copyright 2005-2006 Joachim Henke
- *
- * @see Base91 http://base91.sourceforge.net/
- * @see Base32 https://github.com/Katoga/allyourbase/blob/master/src/Allyourbase/Base32.php
-
- * Class Base91
- * @package ZF
+ * @license   https://opensource.org/licenses/GPL-3.0 GPL
+ * @see       Base91 http://base91.sourceforge.net/
+ * @see       Base32 https://github.com/Katoga/allyourbase/blob/master/src/Allyourbase/Base32.php
+ * @since     2019.03.23
  */
-class BaseCode {
+class BaseCode
+{
     /**
      * Base91编码表
+     *
      * @var array
      */
-    private static $b91_enctab = array(
+    private static $_b91_enctab = array(
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -40,49 +39,60 @@ class BaseCode {
 
     /**
      * Base91解码表
+     *
      * @var array
      */
-    private static $b91_dectab;
+    private static $_b91_dectab;
 
     /**
      * Base16编码表（已弃用）
-     * @var array
+     *
+     * @var        array
      * @deprecated
      */
-    private static $b16_enctab = array(
+    private static $_b16_enctab = array(
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
     );
 
     /**
      * 初始化Base91解码表
-     * @since 2018.11.13
+     *
+     * @return void
+     * @static
+     * @since  2018.11.13
      */
-    private static function init() {
-        if (!self::$b91_dectab) self::$b91_dectab = array_flip(self::$b91_enctab);
+    private static function _init()
+    {
+        if (!self::$_b91_dectab) {
+            self::$_b91_dectab = array_flip(self::$_b91_enctab);
+        }
     }
 
     /**
      * Base91解码
-     * @since 2018.11.13
      *
-     * @param $d
+     * @param string $d string
+     *
      * @return string
+     * @static
+     * @since  2018.11.13
      */
-    public static function base91_decode($d)
+    public static function base91Decode($d)
     {
-        self::init();
+        self::_init();
         $l = strlen($d);
         $v = -1;
         $b = 0;
         $o = '';
         $n = 0;
         for ($i = 0; $i < $l; ++$i) {
-            $c = self::$b91_dectab[$d{$i}];
-            if (!isset($c))
+            $c = self::$_b91_dectab[$d{$i}];
+            if (!isset($c)) {
                 continue;
-            if ($v < 0)
+            }
+            if ($v < 0) {
                 $v = $c;
-            else {
+            } else {
                 $v += $c * 91;
                 $b |= $v << $n;
                 $n += ($v & 8191) > 88 ? 13 : 14;
@@ -94,21 +104,24 @@ class BaseCode {
                 $v = -1;
             }
         }
-        if ($v + 1)
+        if ($v + 1) {
             $o .= chr(($b | $v << $n) & 255);
+        }
         return $o;
     }
 
     /**
      * Base91编码
-     * @since 2018.11.13
      *
-     * @param $d
+     * @param string $d string
+     *
      * @return string
+     * @static
+     * @since  2018.11.13
      */
-    public static function base91_encode($d)
+    public static function base91Encode($d)
     {
-        self::init();
+        self::_init();
         $b = 0;
         $n = 0;
         $o = '';
@@ -126,25 +139,29 @@ class BaseCode {
                     $b >>= 14;
                     $n -= 14;
                 }
-                $o .= self::$b91_enctab[$v % 91] . self::$b91_enctab[$v / 91];
+                $o .= self::$_b91_enctab[$v % 91] . self::$_b91_enctab[$v / 91];
             }
         }
         if ($n) {
-            $o .= self::$b91_enctab[$b % 91];
-            if ($n > 7 || $b > 90)
-                $o .= self::$b91_enctab[$b / 91];
+            $o .= self::$_b91_enctab[$b % 91];
+            if ($n > 7 || $b > 90) {
+                $o .= self::$_b91_enctab[$b / 91];
+            }
         }
         return $o;
     }
 
     /**
      * Base16编码
-     * @since 2018.11.13
      *
-     * @param $str
-     * @return array
+     * @param string $str string
+     *
+     * @return string
+     * @static
+     * @since  2019.03.23
      */
-    public static function base16_encode($str) {
+    public static function base16Encode($str)
+    {
         /*
         //老算法，意义不大，直接用bin2hex处理
         $i = 0;
@@ -163,12 +180,15 @@ class BaseCode {
 
     /**
      * Base16解码
-     * @since 2018.11.13
      *
-     * @param $str
+     * @param string $str str
+     *
      * @return bool|string
+     * @static
+     * @since  2018.11.13
      */
-    public static function base16_decode($str) {
+    public static function base16Decode($str)
+    {
         /*
         //老算法，意义不大，直接用hex2bin处理
         $i = 0;
@@ -201,7 +221,7 @@ class BaseCode {
      * 0-9, A-Z without I, L, O, U
      *
      * @link http://www.crockford.com/wrmg/base32.html
-     * @var int
+     * @var  int
      */
     const CROCKFORD = 3;
     /**
@@ -244,11 +264,17 @@ class BaseCode {
     {
         self::$type = $type;
     }
+
     /**
-     * @param string $input binary string
-     * @return string ascii string
+     * Base32Encode
+     *
+     * @param string $input
+     *
+     * @return string
+     * @static
+     * @since  2019.03.23
      */
-    public static function base32_encode(string $input): string
+    public static function base32Encode(string $input): string
     {
         $output = '';
         if ($input != '') {
@@ -274,11 +300,17 @@ class BaseCode {
         }
         return $output;
     }
+
     /**
-     * @param string $input ascii string
-     * @return string binary string
+     * Base32Decode
+     *
+     * @param string $input string
+     *
+     * @return string
+     * @static
+     * @since  2019.03.23
      */
-    public static function base32_decode(string $input): string
+    public static function base32Decode(string $input): string
     {
         $output = '';
         if ($input != '') {
@@ -305,9 +337,10 @@ class BaseCode {
     /**
      * Pads $string on right side with $char to length divisible by $factor
      *
-     * @param string $string
-     * @param int $factor
-     * @param string $char
+     * @param string $string string
+     * @param int    $factor factor
+     * @param string $char   char
+     *
      * @return string
      */
     protected static function pad(string $string, int $factor, string $char): string
@@ -324,8 +357,9 @@ class BaseCode {
     /**
      * Trims $char from right side of $string to length divisible by $factor
      *
-     * @param string $string
-     * @param int $factor
+     * @param string $string string
+     * @param int    $factor factor
+     *
      * @return string
      */
     protected static function trim(string $string, int $factor): string
@@ -340,7 +374,10 @@ class BaseCode {
         return $output;
     }
     /**
-     * @param int $type
+     * GetEncodeAlphabet
+     *
+     * @param int $type type
+     *
      * @return array
      */
     protected static function getEncodingAlphabet(int $type): array
@@ -348,7 +385,10 @@ class BaseCode {
         return self::getAlphabet($type, self::ENCODE);
     }
     /**
-     * @param int $type
+     * GetDecodeAlphabet
+     *
+     * @param int $type type
+     *
      * @return array
      */
     protected static function getDecodingAlphabet(int $type): array
@@ -356,62 +396,69 @@ class BaseCode {
         return self::getAlphabet($type, self::DECODE);
     }
     /**
-     * @param int $type
-     * @param int $mode
+     * GetAlphabet
+     *
+     * @param int $type type
+     * @param int $mode mode
+     *
      * @return array
      * @throws \InvalidArgumentException
      */
     protected static function getAlphabet(int $type, int $mode): array
     {
         if (!isset(self::$alphabet[$type])) {
-            throw new \InvalidArgumentException(sprintf('Wrong alphabet requested: "%s"!', $type));
+            throw new \InvalidArgumentException(
+                sprintf('Wrong alphabet requested: "%s"!', $type)
+            );
         }
         if (!isset(self::$alphabet[$type][$mode])) {
-            throw new \InvalidArgumentException(sprintf('Wrong mode requested: "%s"!', $mode));
+            throw new \InvalidArgumentException(
+                sprintf('Wrong mode requested: "%s"!', $mode)
+            );
         }
         if (empty(self::$alphabet[$type][$mode])) {
             // generate the requested alphabet
             switch ($type) {
-                case self::RFC4648:
-                    $alphabet = array_merge(
+            case self::RFC4648:
+                $alphabet = array_merge(
+                    range('A', 'Z'),
+                    ['2', '3', '4', '5', '6', '7']
+                );
+                self::$alphabet[$type][self::ENCODE] = $alphabet;
+                self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
+                break;
+            case self::RFC2938:
+                $alphabet = array_merge(
+                    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                    range('A', 'V')
+                );
+                self::$alphabet[$type][self::ENCODE] = $alphabet;
+                self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
+                break;
+            case self::CROCKFORD:
+                $alphabet = array_merge(
+                    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                    array_diff(
                         range('A', 'Z'),
-                        ['2', '3', '4', '5', '6', '7']
-                    );
-                    self::$alphabet[$type][self::ENCODE] = $alphabet;
-                    self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
-                    break;
-                case self::RFC2938:
-                    $alphabet = array_merge(
-                        ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-                        range('A', 'V')
-                    );
-                    self::$alphabet[$type][self::ENCODE] = $alphabet;
-                    self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
-                    break;
-                case self::CROCKFORD:
-                    $alphabet = array_merge(
-                        ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-                        array_diff(
-                            range('A', 'Z'),
-                            ['I', 'L', 'O', 'U']
-                        )
-                    );
-                    self::$alphabet[$type][self::ENCODE] = $alphabet;
-                    $decodeCrockford = array_merge(
-                        array_flip($alphabet),
-                        [
-                            'I' => 1,
-                            'L' => 1,
-                            'O' => 0
-                        ]
-                    );
-                    $lowercase = range('a', 'z');
-                    unset($lowercase[20]);
-                    foreach ($lowercase as $ch) {
-                        $decodeCrockford[$ch] = $decodeCrockford[strtoupper($ch)];
-                    }
-                    self::$alphabet[$type][self::DECODE] = $decodeCrockford;
-                    break;
+                        ['I', 'L', 'O', 'U']
+                    )
+                );
+                self::$alphabet[$type][self::ENCODE] = $alphabet;
+                $decodeCrockford = array_merge(
+                    array_flip($alphabet),
+                    [
+                        'I' => 1,
+                        'L' => 1,
+                        'O' => 0
+                    ]
+                );
+                $lowercase = range('a', 'z');
+                unset($lowercase[20]);
+                foreach ($lowercase as $ch) {
+                    $decodeCrockford[$ch] = $decodeCrockford[strtoupper($ch)];
+                }
+                self::$alphabet[$type][self::DECODE] = $decodeCrockford;
+                break;
             }
         }
         return self::$alphabet[$type][$mode];

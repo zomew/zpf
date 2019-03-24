@@ -10,29 +10,31 @@ namespace ZF;
 
 /**
  * 阿里大于短信发送封装类
- * @author Jamers <jamersnox@zomew.net>
- * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2018.12.15
  *
- * Class DySDK
  * @package ZF
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2018.12.15
  */
-class DySDK {
+class DySDK
+{
     /**
      * 配置文件格式
+     * 
      * @var array
-     *
      */
     private static $_config = array();
 
     /**
      * CSRF Token 键值
+     * 
      * @var string
      */
     private static $_Csrf_Token_Key = '_SESSION_CSRF_TOKEN';
 
     /**
      * 配置示例代码
+     * 
      * @var array
      */
     private static $_config_example = array(
@@ -61,19 +63,20 @@ class DySDK {
         'SignCheckLife' => 300,
     );
 
-    private static $keys = 'your sign encrypt keys';
-    private static $obv = -1000000300;
-    private static $bits = array(16,8,14,2);
+    private static $_keys = 'your sign encrypt keys';
+    private static $_obv = -1000000300;
+    private static $_bits = array(16,8,14,2);
 
     /**
      * 生成签名并发起请求
      *
-     * @param $accessKeyId string AccessKeyId (https://ak-console.aliyun.com/)
+     * @param $accessKeyId     string AccessKeyId (https://ak-console.aliyun.com/)
      * @param $accessKeySecret string AccessKeySecret
      * @param $domain string API接口所在域名
      * @param $params array API具体参数
      * @param $security boolean 使用https
      * @param $method string 使用GET或POST方法请求，VPC仅支持POST
+     *
      * @return bool|string 返回API接口调用结果，当发生错误时返回false
      */
     private static function request($accessKeyId, $accessKeySecret, $domain, $params, $security = false, $method = 'POST') {
@@ -338,11 +341,11 @@ class DySDK {
             $str = false;
         }
         if ($ak == '') $ak = md5(Common::RandStr(30));
-        $obv = self::$obv;
+        $obv = self::$_obv;
         if (isset(self::$_config['TimeStampObv']) && self::$_config['TimeStampObv']) $obv = self::$_config['TimeStampObv'];
         if ($stamp == 0) $stamp = time() + $obv;
         if ($ip == '') $ip = Common::GetIP();
-        $keys = self::$keys;
+        $keys = self::$_keys;
         if (isset(self::$_config['EncryptKeys']) && self::$_config['EncryptKeys']) $keys = self::$_config['EncryptKeys'];
         $s = self::hideip(md5("|_{$ak},&{$keys}-{$ip}]{$stamp}"), $ip);
         if (!$str || $ary) {
@@ -372,7 +375,7 @@ class DySDK {
                 if ($v>255 || $v < 0) return $ret;
                 $ary[] = sprintf('%02x',$v ^ 0x79);
             }
-            $bits = self::$bits;
+            $bits = self::$_bits;
             if (isset(self::$_config['bits']) && self::$_config['bits']) $bits = self::$_config['bits'];
             foreach ($bits as $k => $v) {
                 $start = ($v-1)*2;
@@ -393,7 +396,7 @@ class DySDK {
     public static function readip($hash) {
         $ary = array();
         if (is_string($hash) && strlen($hash)>=32) {
-            foreach (self::$bits as $k => $v) {
+            foreach (self::$_bits as $k => $v) {
                 $start = ($v-1)*2;
                 $end = $start + 2;
                 $ary[] = hexdec(substr($hash,$start,$end-$start)) ^ 0x79;
@@ -415,7 +418,7 @@ class DySDK {
         $stamp = Common::input('t');
         $ret = false;
         if ($sign && is_string($sign)) {
-            $obv = self::$obv;
+            $obv = self::$_obv;
             if (isset(self::$_config['TimeStampObv']) && self::$_config['TimeStampObv']) $obv = self::$_config['TimeStampObv'];
             $life = -1;
             if (isset(self::$_config['SignCheckLife']) && self::$_config['SignCheckLife']) $life = self::$_config['SignCheckLife'];

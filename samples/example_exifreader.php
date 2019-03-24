@@ -10,7 +10,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-include('../src/__INIT.php');
+require '../src/__INIT.php';
 
 $IMG = './';
 if ((!array_key_exists('f', $_GET)) || ($_GET['f'] == "")) {
@@ -29,7 +29,7 @@ if ((!array_key_exists('f', $_GET)) || ($_GET['f'] == "")) {
 }
 $f = $IMG . $filename;
 
-$d = \ZF\ExifReader::GetExifTagsData($f);
+$d = \ZF\ExifReader::getExifTagsData($f);
 $o = \ZF\ExifReader::buildhtml($d, '', 'ct');
 
 echo '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">';
@@ -63,7 +63,7 @@ echo <<<EOT
     
     var o_a = [];
     function trig_tips(id) {
-        if (typeof(o_a[id])=='undefined') {
+        if (typeof(o_a[id]) === 'undefined') {
             o_a[id]=false;
         }
 

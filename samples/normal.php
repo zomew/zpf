@@ -7,7 +7,7 @@
  * File: test.php
  */
 
-include_once('../src/__INIT.php');
+require_once '../src/__INIT.php';
 
 //基本用法：调用指定模块函数
 echo \ZF\Common::GetFullUrl() . "<br>";

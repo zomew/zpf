@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--bootstrap指定启动测试时, 先加载vendor/autoload.php-->
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         bootstrap="./src/__INIT.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false">
+
+    <!--testsuite指定测试文件的目录-->
+    <testsuites>
+        <testsuite name="Test Class">
+            <directory suffix="Test.php">./tests</directory>
+            <exclude>./tests/excludeTest.php</exclude>
+        </testsuite>
+    </testsuites>
+
+    <!--filter过滤依赖文件的位置-->
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
+
+    <logging>
+        <log type="coverage-html" target="./tmp/report" lowUpperBound="35"
+             highLowerBound="70"/>
+        <log type="coverage-clover" target="./tmp/coverage.xml"/>
+        <log type="coverage-php" target="./tmp/coverage.serialized"/>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
+        <!--<log type="junit" target="./tmp/logfile.xml" logIncompleteSkipped="false"/>-->
+        <log type="testdox-html" target="./tmp/testdox.html"/>
+        <log type="testdox-text" target="./tmp/testdox.txt"/>
+    </logging>
+</phpunit>

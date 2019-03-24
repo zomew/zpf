@@ -7,7 +7,7 @@
  * File: demo_twig.php
  */
 
-include_once('../src/__INIT.php');
+require_once '../src/__INIT.php';
 
 $twig = new \ZF\Twig();
 $data = array(

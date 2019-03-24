@@ -11,24 +11,34 @@ namespace ZF;
 
 /**
  * 短信验证码较验模块
- * @author Jamers <jamersnox@zomew.net>
- * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2018.12.17
  *
- * Class Cls_SmsAuthCode
  * @package ZF
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2018.12.17
  */
-class SmsAuthCode {
+class SmsAuthCode
+{
     /**
      * 发送短信验证码
-     * @since 2018.12.17
      *
-     * @param string $mobile
+     * @param string $mobile 
+     * 
+     * @return void
+     * @since  2018.12.17
      */
-    public static function SendCode($mobile = '') {
-        if ($mobile && preg_match("/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/", $mobile)) {
+    public static function sendCode($mobile = '')
+    {
+        if ($mobile 
+            && preg_match(
+                "/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/", 
+                $mobile
+            )
+        ) {
             $msg = '';
-            if (defined('RUN_ENV') && in_array(RUN_ENV, array('local', /*'dev',*/))) {
+            if (defined('RUN_ENV') 
+                && in_array(RUN_ENV, array('local', /*'dev',*/))
+            ) {
                 $dev = true;
             } else {
                 $dev = false;
@@ -55,7 +65,12 @@ class SmsAuthCode {
                     );
 
                     if (!$dev) {
-                        $resp = DySDK::sendSms($mobile, 1, array('code' => $code,), true);
+                        $resp = DySDK::sendSms(
+                            $mobile, 
+                            1, 
+                            array('code' => $code,), 
+                            true
+                        );
                     } else {
                         $resp['data'] = $code;
                     }
@@ -63,11 +78,11 @@ class SmsAuthCode {
                 } else {
                     $resp = array('code' => 1, 'msg' => $msg, 'token' => $token,);
                 }
-            }else{
+            } else {
                 $resp = array('code' => 1, 'msg' => '非法请求',);
             }
             exit(Common::JsonP($resp));
-        }else{
+        } else {
             $msg = '您所输入的手机号码无效';
         }
         exit(Common::JsonP(array('code' => 1, 'msg' => $msg,)));
@@ -75,14 +90,18 @@ class SmsAuthCode {
 
     /**
      * 检查验证码是否过期
-     * @since 2018.12.17
      *
-     * @param string $mobile
-     * @param string $code
+     * @param string $mobile 
+     * @param string $code 
+     * 
      * @return bool
+     * @since  2018.12.17
      */
-    public static function CheckAuthCode($mobile = '', $code = '') {
-        if (!isset($_SESSION['login_code'])) exit(Common::JsonP(array('code' => 1, 'msg' => '请先获取验证码',)));
+    public static function checkAuthCode($mobile = '', $code = '')
+    {
+        if (!isset($_SESSION['login_code'])) {
+            exit(Common::JsonP(array('code' => 1, 'msg' => '请先获取验证码',)));
+        }
         $login_code = $_SESSION['login_code'];
         // 5分钟有效期
         $time = time() - $login_code['time'];

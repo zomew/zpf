@@ -12,19 +12,19 @@ namespace ZF;
 /**
  * Twig简易封装实体类，可直接用子属性调用对应的实体类
  *
- * @author Jamers <jamersnox@zomew.net>
- * @license https://opensource.org/licenses/GPL-3.0 GPL
- * @since 2019.03.21
- *
- * Class Twig
  * @package ZF
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2019.03.21
  */
-class Twig extends __BASE {
+class Twig extends ComposerBase
+{
     /**
      * \Twig\Environment实例化的默认参数
+     *
      * @var array
      */
-    private $options = array(
+    private $_options = array(
         'templates_dir' => 'views',
         'cache' => 'cache',
         'auto_reload' => true,
@@ -32,21 +32,24 @@ class Twig extends __BASE {
 
     /**
      * Twig的一级调用路径
+     *
      * @var string
      */
-    protected $_root = '\\Twig';
+    protected $root = '\\Twig';
 
     /**
      * 镜象文件搜索路径 如果Twig没有结构上的大变化，一般不需要修改
+     *
      * @var string
      */
-    protected $_dir = ZF_ROOT . "vendor/twig/twig/src/";
+    protected $dir = ZF_ROOT . "vendor/twig/twig/src/";
 
     /**
      * 是否已经实例化标志，用于判断全局变量清除依据
+     *
      * @var bool
      */
-    private $isConstract = false;
+    private $_isConstract = false;
 
 
     /**
@@ -139,16 +142,17 @@ class Twig extends __BASE {
 
     /**
      * Twig constructor.
+     *
      * @param array $options
      */
     public function __construct($options = array())
     {
-        parent::__construct('', $this->_root, $this->_dir);
-        $this->CleanPublicProperty();
+        parent::__construct('', $this->root, $this->dir);
+        $this->_cleanPublicProperty();
         if ($options && is_array($options)) {
-            $options = array_merge($this->options, $options);
+            $options = array_merge($this->_options, $options);
         } else {
-            $options = $this->options;
+            $options = $this->_options;
         }
         $this->loader = new \Twig\Loader\FilesystemLoader($options['templates_dir']);
         unset($options['templates_dir']);
@@ -157,11 +161,13 @@ class Twig extends __BASE {
 
     /**
      * 为了使魔术方法接管，清除公用属性
-     * @since 2019.03.21
      *
+     * @return void
+     * @since  2019.03.21
      */
-    private function CleanPublicProperty() {
-        if (!$this->isConstract) {
+    private function _cleanPublicProperty()
+    {
+        if (!$this->_isConstract) {
             try {
                 $ref = new \ReflectionClass($this);
                 foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $v) {
@@ -169,8 +175,9 @@ class Twig extends __BASE {
                     $this->modules[] = $name;
                     unset($this->$name);
                 }
-            }catch(\ReflectionException $e) {}
-            $this->isConstract = true;
+            }catch(\ReflectionException $e) {
+            }
+            $this->_isConstract = true;
         }
     }
 }
