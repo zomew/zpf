@@ -21,14 +21,19 @@
     <!--filter过滤依赖文件的位置-->
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./src</directory>
+            <directory suffix=".php">./src/class/ZF/</directory>
         </whitelist>
     </filter>
-
+    <!--PHP环境变量配置-->
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="CACHE_DRIVER" value="array"/>
+    </php>
     <logging>
         <log type="coverage-html" target="./tmp/report" lowUpperBound="35"
              highLowerBound="70"/>
         <log type="coverage-clover" target="./tmp/coverage.xml"/>
+        <log type="coverage-html" target="./tmp/report/html" lowUpperBound="35" highLowerBound="70"/>
         <log type="coverage-php" target="./tmp/coverage.serialized"/>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
         <!--<log type="junit" target="./tmp/logfile.xml" logIncompleteSkipped="false"/>-->

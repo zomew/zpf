@@ -28,7 +28,7 @@ Class Common
     );
 
     /**
-    使用正则将特殊标记替换成对应值
+     * 使用正则将特殊标记替换成对应值
      *
      * @param string $str 原始字符串
      * @param array  $ary 数据源

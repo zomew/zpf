@@ -26,6 +26,7 @@ namespace ZF;
  * 11. 添加统计符合条件的记录条数  2018.10.26
  * 12. 特殊运算方式被当成字段替换的问题处理/update赋值部分允许使用`xx`字段直接处理 2018.11.08
  * 13. 添加批量删除方法，内部条件为 and ，外部条件为 or 2018.12.05
+ * 14. where in以及not in 操作，添加子查询功能 2019.04.03
  */
 
 class Pdomysql
@@ -494,11 +495,12 @@ class Pdomysql
     /**
      * 用于执行前进行查看查询语句，主要用于调试
      * 
-     * @param string $tbName 
+     * @param string $tbName 表名
+     * @param bool   $clean  是否清除where数据
      * 
      * @return mixed|string
      */
-    public function getSql($tbName = '')
+    public function getSql($tbName = '', $clean = false)
     {
         $tbName = $this->getTablename($tbName);
         $sql = "select " . trim($this->field) . " from `" . $tbName . "` " .
@@ -510,6 +512,9 @@ class Pdomysql
                 "'" . str_replace("'", "\'", $v) . "' ",
                 $sql
             );
+        }
+        if ($clean) {
+            $this->clear = 1;
         }
         return $sql;
     }
@@ -659,6 +664,13 @@ class Pdomysql
                         $condition = ' (' . $this->addChar($k) . 
                             " {$opt} (" . $this->_addQuote($v) . '))';
                         $this->where .= $ismark ? 
+                            " {$logic} {$condition}" : $condition;
+                        $ismark = true;
+                    }
+                    if (is_string($v) && $v) {
+                        $condition = ' (' . $this->addChar($k) .
+                            " {$opt} (" . $v . '))';
+                        $this->where .= $ismark ?
                             " {$logic} {$condition}" : $condition;
                         $ismark = true;
                     }
