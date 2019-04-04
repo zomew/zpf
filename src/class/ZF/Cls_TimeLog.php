@@ -20,30 +20,30 @@ class TimeLog
 {
     /**
      * 开始时间
-     * 
+     *
      * @var int
      */
-    private static $_start = 0;
+    private static $start = 0;
     /**
      * 最后更新时间
-     * 
+     *
      * @var int
      */
-    private static $_last = 0;
+    private static $last = 0;
     /**
      * 时间记录数组
-     * 
+     *
      * @var array
      */
-    private static $_timelog = array();
+    private static $timelog = array();
     /**
      * 日志名变量
-     * 
+     *
      * @var string
      */
-    private static $_file = '';
+    private static $file = '';
 
-    private static $_debug = false;
+    private static $debug = false;
 
     /**
      * 检查是否允许时间调试
@@ -52,14 +52,14 @@ class TimeLog
      */
     public static function checkTag()
     {
-        if (!self::$_file) {
-            self::$_file = '_TimeLog_'.date('Ymd').'.txt';
+        if (!self::$file) {
+            self::$file = '_TimeLog_'.date('Ymd').'.txt';
         }
         $ret = false;
         if (isset($_GET['timelog']) && $_GET['timelog'] == '1') {
             $ret = true;
         }
-        if (self::$_debug) {
+        if (self::$debug) {
             $ret = true;
         }
         return $ret;
@@ -74,7 +74,7 @@ class TimeLog
      */
     public static function enable()
     {
-        self::$_debug = true;
+        self::$debug = true;
     }
 
     /**
@@ -86,7 +86,7 @@ class TimeLog
      */
     public static function disable()
     {
-        self::$_debug = false;
+        self::$debug = false;
     }
 
     /**
@@ -99,9 +99,9 @@ class TimeLog
     public static function start()
     {
         if (self::checkTag()) {
-            self::$_start = microtime(true);
-            self::$_last = self::$_start;
-            self::$_timelog[] = self::_getCallInfo() . "\t" . self::$_start;
+            self::$start = microtime(true);
+            self::$last = self::$start;
+            self::$timelog[] = self::getCallInfo() . "\t" . self::$start;
         }
     }
 
@@ -116,9 +116,9 @@ class TimeLog
     {
         if (self::checkTag()) {
             $t = microtime(true);
-            $p = $t - self::$_last;
-            self::$_last = $t;
-            self::$_timelog[] = self::_getCallInfo() . "\t" . $p . '  '.$t;
+            $p = $t - self::$last;
+            self::$last = $t;
+            self::$timelog[] = self::getCallInfo() . "\t" . $p . '  '.$t;
         }
     }
 
@@ -133,30 +133,29 @@ class TimeLog
     {
         if (self::checkTag()) {
             $t = microtime(true);
-            $p = $t - self::$_last;
-            $a = $t - self::$_start;
-            self::$_timelog[] = self::_getCallInfo() . "\t" . $p . '   ' .
+            $p = $t - self::$last;
+            $a = $t - self::$start;
+            self::$timelog[] = self::getCallInfo() . "\t" . $p . '   ' .
                 $t . "  \ntotal:". $a ;
-            \ZF\Common::_savelog(self::$_file,  "".implode("\n", self::$_timelog));
-            self::$_start = 0;
-            self::$_last = 0;
-            self::$_timelog = array();
+            \ZF\Common::_savelog(self::$file, "".implode("\n", self::$timelog));
+            self::$start = 0;
+            self::$last = 0;
+            self::$timelog = array();
         }
     }
 
     /**
      * 获取上层调用信息
-     * 
+     *
      * @return string
      */
-    private static function _getCallInfo()
+    private static function getCallInfo()
     {
         $a = debug_backtrace();
         $ret = '';
         if ($a && isset($a[1])) {
             $b = $a[1];
-            $ret = basename($b['file']) . ':' . $b['line'] .
-                ':' . $b['function'].':';
+            $ret = basename($b['file']) . ':' . $b['line'] . ':' . $b['function'].':';
         }
         return $ret;
     }

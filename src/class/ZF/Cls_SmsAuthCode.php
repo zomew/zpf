@@ -22,23 +22,21 @@ class SmsAuthCode
     /**
      * 发送短信验证码
      *
-     * @param string $mobile 
-     * 
+     * @param string $mobile
+     *
      * @return void
      * @since  2018.12.17
      */
     public static function sendCode($mobile = '')
     {
-        if ($mobile 
+        if ($mobile
             && preg_match(
-                "/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/", 
+                "/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/",
                 $mobile
             )
         ) {
             $msg = '';
-            if (defined('RUN_ENV') 
-                && in_array(RUN_ENV, array('local', /*'dev',*/))
-            ) {
+            if (defined('RUN_ENV') && in_array(RUN_ENV, array('local', /*'dev',*/))) {
                 $dev = true;
             } else {
                 $dev = false;
@@ -65,12 +63,7 @@ class SmsAuthCode
                     );
 
                     if (!$dev) {
-                        $resp = DySDK::sendSms(
-                            $mobile, 
-                            1, 
-                            array('code' => $code,), 
-                            true
-                        );
+                        $resp = DySDK::sendSms($mobile, 1, array('code' => $code,), true);
                     } else {
                         $resp['data'] = $code;
                     }
@@ -91,9 +84,9 @@ class SmsAuthCode
     /**
      * 检查验证码是否过期
      *
-     * @param string $mobile 
-     * @param string $code 
-     * 
+     * @param string $mobile
+     * @param string $code
+     *
      * @return bool
      * @since  2018.12.17
      */

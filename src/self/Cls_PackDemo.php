@@ -49,7 +49,7 @@ class PackDemo extends \ZF\Entity
      *
      * @var bool
      */
-    private static $_is_construct = false;
+    private static $is_construct = false;
 
     /**
      * 对象初始化
@@ -57,8 +57,8 @@ class PackDemo extends \ZF\Entity
      */
     public function __construct()
     {
-        self::$_is_construct = true;
-        \ZF\Common::LoadConfig();
+        self::$is_construct = true;
+        \ZF\Common::loadConfig();
     }
 
     /**
@@ -73,11 +73,11 @@ class PackDemo extends \ZF\Entity
     {
         if (!$this->db) {
             if ($conf == array()) {
-                $conf = \ZF\Common::LoadConfigData(self::$config_head, 'db');
-            } else if (is_string($conf)) {
-                $conf = \ZF\Common::LoadConfigData($conf, 'db');
+                $conf = \ZF\Common::loadConfigData(self::$config_head, 'db');
+            } elseif (is_string($conf)) {
+                $conf = \ZF\Common::loadConfigData($conf, 'db');
             }
-            $this->LoadClass('db', $conf);
+            $this->loadClass('db', $conf);
         }
     }
 
@@ -96,9 +96,9 @@ class PackDemo extends \ZF\Entity
         $ret = self::$sdb;
         if (!self::$sdb || $alone) {
             if ($conf == array()) {
-                $conf = \ZF\Common::LoadConfigData(self::$config_head, 'db');
-            } else if (is_string($conf)) {
-                $conf = \ZF\Common::LoadConfigData($conf, 'db');
+                $conf = \ZF\Common::loadConfigData(self::$config_head, 'db');
+            } elseif (is_string($conf)) {
+                $conf = \ZF\Common::loadConfigData($conf, 'db');
             }
             if ($alone) {
                 $ret = new \ZF\Pdomysql($conf);
@@ -151,11 +151,11 @@ class PackDemo extends \ZF\Entity
     {
         if (!$this->rl) {
             if ($conf == array()) {
-                $conf = \ZF\Common::LoadConfigData(self::$config_head, 'redis');
-            } else if (is_string($conf)) {
-                $conf = \ZF\Common::LoadConfigData($conf, 'redis');
+                $conf = \ZF\Common::loadConfigData(self::$config_head, 'redis');
+            } elseif (is_string($conf)) {
+                $conf = \ZF\Common::loadConfigData($conf, 'redis');
             }
-            $this->LoadClass('rl', $conf);
+            $this->loadClass('rl', $conf);
         }
     }
 
@@ -174,9 +174,9 @@ class PackDemo extends \ZF\Entity
         $ret = self::$srl;
         if (!self::$srl || $alone) {
             if ($conf == array()) {
-                $conf = \ZF\Common::LoadConfigData(self::$config_head, 'redis');
-            } else if (is_string($conf)) {
-                $conf = \ZF\Common::LoadConfigData($conf, 'redis');
+                $conf = \ZF\Common::loadConfigData(self::$config_head, 'redis');
+            } elseif (is_string($conf)) {
+                $conf = \ZF\Common::loadConfigData($conf, 'redis');
             }
             if ($alone) {
                 $ret = new \ZF\Redislock($conf);
@@ -229,9 +229,9 @@ class PackDemo extends \ZF\Entity
     {
         if (!$this->md) {
             if ($conf == array()) {
-                $conf = \ZF\Common::LoadConfigData(self::$config_head, 'mongodb');
+                $conf = \ZF\Common::loadConfigData(self::$config_head, 'mongodb');
             }
-            $this->LoadClass('md', $conf);
+            $this->loadClass('md', $conf);
         }
     }
 
@@ -250,7 +250,7 @@ class PackDemo extends \ZF\Entity
         $ret = self::$smd;
         if (!self::$smd) {
             if ($conf == array()) {
-                $conf = \ZF\Common::LoadConfigData(self::$config_head, 'mongodb');
+                $conf = \ZF\Common::loadConfigData(self::$config_head, 'mongodb');
             }
             if ($alone) {
                 $ret = new \ZF\Mongodb($conf);

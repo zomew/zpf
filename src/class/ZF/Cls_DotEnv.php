@@ -5,8 +5,8 @@
  * Date: 2018/7/7
  * Time: 11:01
  */
-
 namespace ZF;
+
 /**
  * 自定义环境变量配置类
  *
@@ -19,44 +19,42 @@ class DotEnv
 {
     /**
      * ENV文件路径
-     * 
+     *
      * @var
      */
-    private static $_envfile;
+    private static $envfile;
     /**
      * 获取的ENV数据数组
-     * 
+     *
      * @var
      */
-    private static $_ENV;
-
+    private static $ENV;
     /**
      * 新建对象时将路径优先处理
      * DotEnv constructor.
-     * 
-     * @param string $path 
+     *
+     * @param string $path
      */
-    public function __construct($path='')
+    public function __construct($path = '')
     {
         self::getEnvFile($path);
     }
-
     /**
      * 获取并设置环境变量文件，支持自定义文件
-     * 
-     * @param string $path 
-     * 
+     *
+     * @param string $path
+     *
      * @return mixed|string
      */
     public static function getEnvFile($path = '')
     {
         if ($path == '') {
-            if (self::$_envfile) {
-                return self::$_envfile;
+            if (self::$envfile) {
+                return self::$envfile;
             }
             if (defined('ZW_ROOT')) {
                 $path = ZW_ROOT;
-            } else if (defined('ZF_ROOT')) {
+            } elseif (defined('ZF_ROOT')) {
                 $path = ZF_ROOT;
             } else {
                 $path = __DIR__;
@@ -65,31 +63,32 @@ class DotEnv
         if (is_dir($path)) {
             $path = rtrim($path.'\\/').DIRECTORY_SEPARATOR;
             if (file_exists($path.'.env')) {
-                self::$_envfile = $path.'.env';
-            } else if (file_exists($path.'.env.example')) {
-                self::$_envfile = $path.'.env.example';
+                self::$envfile = $path.'.env';
+            } elseif (file_exists($path.'.env.example')) {
+                self::$envfile = $path.'.env.example';
             }
         } else {
             if (file_exists($path)) {
-                self::$_envfile = $path;
+                self::$envfile = $path;
             }
         }
-        return self::$_envfile;
+        return self::$envfile;
     }
-
     /**
      * 获取环境变量数据
-     * 
-     * @param string $key 
-     * @param string $path 
-     * @param bool   $sensitive 
-     * 
+     *
+     * @param string $key
+     * @param string $path
+     * @param bool   $sensitive
+     *
      * @return array|string
      */
-    public static function getEnvData($key = '',$path = '',$sensitive = true)
+    public static function getEnvData($key = '', $path = '', $sensitive = true)
     {
         $ret = '';
-        if ($key == '') return self::getEnvArray($path);
+        if ($key == '') {
+            return self::getEnvArray($path);
+        }
         if (strpos($key, '.') === false) {
             $group = 'MAIN';
             $key = trim($key);
@@ -101,16 +100,16 @@ class DotEnv
         if ($group == '' || $key == '') {
             return '';
         }
-        if (!self::$_ENV) {
+        if (!self::$ENV) {
             self::getEnvArray($path);
         }
-        if (isset(self::$_ENV[$group][$key])) {
-            $ret = self::$_ENV[$group][$key];
+        if (isset(self::$ENV[$group][$key])) {
+            $ret = self::$ENV[$group][$key];
         } else {
             if ($sensitive) {
                 $ret = '';
             } else {
-                foreach (self::$_ENV as $k => $v) {
+                foreach (self::$ENV as $k => $v) {
                     if (strtolower($group) == strtolower($k)) {
                         foreach ($v as $m => $n) {
                             if (strtolower($key) == strtolower($m)) {
@@ -124,57 +123,52 @@ class DotEnv
         }
         return $ret;
     }
-
     /**
      * 将环境变量全部读取到数组中
-     * 
-     * @param string $path 
-     * 
+     *
+     * @param string $path
+     *
      * @return array
      */
     public static function getEnvArray($path = '')
     {
         $ret = array();
-        if (!self::$_envfile) {
+        if (!self::$envfile) {
             self::getEnvFile($path);
         }
-        if (self::$_envfile) {
-            $ary = file(self::$_envfile);
+        if (self::$envfile) {
+            $ary = file(self::$envfile);
             $group = 'MAIN';
             if ($ary) {
                 foreach ($ary as $v) {
                     if (preg_match('/^\s*\[\s*([\d\w]+)\s*\]\s*$/i', $v, $m)) {
                         $group = trim($m[1]);
                     }
-                    if (preg_match(
-                        '/^(?![#;])([\w\d]+)\s*=(.*?)[\r\n]?$/si', $v, $m
-                    )
-                    ) {
+                    if (preg_match('/^(?![#;])([\w\d]+)\s*=(.*?)[\r\n]?$/si', $v, $m)) {
                         if (!isset($ret[$group][trim($m[1])])) {
                             $ret[$group][trim($m[1])] = trim($m[2]);
                         }
                     }
                 }
-                self::$_ENV = $ret;
+                self::$ENV = $ret;
             }
         }
         return $ret;
     }
-
     /**
      * 将环境变量写入系统
-     * 
-     * @param array $data 
-     * 
+     *
+     * @param array $data
+     *
      * @return void
      */
     public static function setEnvVariable($data = array())
     {
-        if (!$data && !self::$_ENV) {
+        if (!$data && !self::$ENV) {
             return;
         }
         if (!$data) {
-            $data = self::$_ENV;
+            $data = self::$ENV;
         }
         foreach ($data as $k => $v) {
             if ($v && is_array($v)) {
@@ -185,7 +179,6 @@ class DotEnv
                         $name = "{$k}.{$m}";
                     }
                     $value = strval($n);
-
                     if (function_exists('apache_getenv')
                         && function_exists('apache_setenv')
                         && apache_getenv($name)
@@ -201,18 +194,17 @@ class DotEnv
             }
         }
     }
-
     /**
      * 清除指定环境变量
-     * 
-     * @param string $name 
-     * 
+     *
+     * @param string $name
+     *
      * @return void
      */
     public static function cleanEnvVariable($name)
     {
-        if (function_exists('apache_getenv') 
-            && function_exists('apache_setenv') 
+        if (function_exists('apache_getenv')
+            && function_exists('apache_setenv')
             && apache_getenv($name)
         ) {
             apache_setenv($name, '');
@@ -222,12 +214,11 @@ class DotEnv
         }
         unset($_ENV[$name], $_SERVER[$name]);
     }
-
     /**
      * 读取系统环境变量
-     * 
-     * @param string $name 
-     * 
+     *
+     * @param string $name
+     *
      * @return array|false|null|string
      */
     public static function getEnvVariable($name)
@@ -242,12 +233,11 @@ class DotEnv
                 return $value === false ? null : $value;
         }
     }
-
     /**
      * 读取变量文件并且设置环境变量
-     * 
+     *
      * @param string $path
-     * 
+     *
      * @return void
      */
     public static function loadAndSetEnvData($path)

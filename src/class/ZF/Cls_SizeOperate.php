@@ -23,7 +23,7 @@ class SizeOperate
      *
      * @var array
      */
-    private static $_unit = array(
+    private static $unit = array(
         'B' => 0,
         'K' => 1,
         'M' => 2,
@@ -38,15 +38,15 @@ class SizeOperate
     /**
      * 将容量转换在字节数
      *
-     * @param string $size 
-     * 
+     * @param string $size
+     *
      * @return string
      */
     public static function size2Byte($size = '1m')
     {
         $ret = '0';
         if ($size) {
-            $list = implode('', array_keys(self::$_unit));
+            $list = implode('', array_keys(self::$unit));
             if (preg_match(
                 '/\s*([\d]+(?:\.[\d]+)?)([' . $list . ']?)b?/i',
                 strtoupper($size),
@@ -55,7 +55,7 @@ class SizeOperate
             ) {
                 $ret = $m[1];
                 if ($m[2]) {
-                    $ret = bcmul($ret, bcpow('1024', self::$_unit[$m[2]]));
+                    $ret = bcmul($ret, bcpow('1024', self::$unit[$m[2]]));
                 }
             }
         }
@@ -65,21 +65,21 @@ class SizeOperate
     /**
      * 将字节数转换成存储单位显示
      *
-     * @param string $bytes 
-     * 
+     * @param string $bytes
+     *
      * @return string
      */
     public static function byte2Unit($bytes = '0')
     {
         $ret = trim($bytes);
         if (preg_match('/[\d]+/i', $ret)) {
-            $tmp = self::$_unit;
+            $tmp = self::$unit;
             arsort($tmp);
             foreach ($tmp as $k => $v) {
                 $val = bcpow('1024', $v);
                 if (bccomp($ret, $val) >= 0) {
                     $t = bcdiv($ret, $val, 4);
-                    $t = self::_roundLastScale($t);
+                    $t = self::roundLastScale($t);
                     $ret = $t.$k;
                     break;
                 }
@@ -91,11 +91,11 @@ class SizeOperate
     /**
      * 将最后一位小数四舍五入
      *
-     * @param string $str 
-     * 
+     * @param string $str
+     *
      * @return string
      */
-    private static function _roundLastScale($str = '0')
+    private static function roundLastScale($str = '0')
     {
         $ret = $str;
         if (preg_match('/^(\d+)\.(\d+)$/', $ret, $m)) {
@@ -124,9 +124,9 @@ class SizeOperate
     /**
      * 存储单位加法运算，支持直接使用数组批量相加
      *
-     * @param string|array $left 
-     * @param string       $right 
-     * 
+     * @param string|array $left
+     * @param string       $right
+     *
      * @return string
      */
     public static function sizeAdd($left, $right = '')
@@ -156,12 +156,12 @@ class SizeOperate
     /**
      * 存储单位减法运算
      *
-     * @param string $left 
-     * @param string $right 
-     * 
+     * @param string $left
+     * @param string $right
+     *
      * @return int|string
      */
-    public static function sizeSub($left = '', $right='')
+    public static function sizeSub($left = '', $right = '')
     {
         $ret = 0;
         if (is_string($left) && $left) {

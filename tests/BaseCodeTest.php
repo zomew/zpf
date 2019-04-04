@@ -11,7 +11,6 @@ require_once __DIR__ . '/../src/__INIT.php';
 
 /**
  * Class BaseCodeTest
- *
  * @author  Jamers <jamersnox@zomew.net>
  * @license https://opensource.org/licenses/GPL-3.0 GPL
  * @since   2019.03.24
@@ -21,7 +20,6 @@ class BaseCodeTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testBase32Decode
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -35,7 +33,6 @@ class BaseCodeTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testBase91
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -49,7 +46,6 @@ class BaseCodeTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testBase16
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -60,5 +56,5 @@ class BaseCodeTest extends PHPUnit\Framework\TestCase
         $this->assertEquals($ret, \ZF\BaseCode::base16Encode($str));
         $this->assertEquals($str, \ZF\BaseCode::base16Decode($ret));
     }
-
 }
+

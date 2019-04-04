@@ -21,7 +21,7 @@ class Entity
     /**
      * ALL对应可以自动加载的变量及类名，键是类变量名称，值为完整类名
      * 没有添加在这里的也可以加载，但只能用完整类名
-     * 
+     *
      * @var array
      */
     public $class = array(
@@ -32,31 +32,31 @@ class Entity
 
     /**
      * Mysql连接对象
-     * 
+     *
      * @var \ZF\Pdomysql
      */
     public $db;
 
     /**
      * Redis连接对象
-     * 
+     *
      * @var \ZF\Redislock
      */
     public $rl;
 
     /**
      * MongoDb连接对象
-     * 
+     *
      * @var \ZF\Mongodb
      */
     public $md;
 
     /**
      * 自动加载模块函数
-     * 
-     * @param string $class 
-     * @param array  $params 
-     * 
+     *
+     * @param string $class
+     * @param array  $params
+     *
      * @return bool
      */
     public function loadClass($class, $params = array())
@@ -89,9 +89,9 @@ class Entity
                 return false;
             }
             $c = "\\".__NAMESPACE__."\\{$uclass}";
-            $this->$name = $this->_newInst($c, $params);
+            $this->$name = $this->newInst($c, $params);
             return $this->$name;
-        } else if (is_array($class)) {
+        } elseif (is_array($class)) {
             foreach ($class as $v) {
                 $this->loadClass($v, $params);
             }
@@ -105,11 +105,11 @@ class Entity
      * @return mixed
      * @since  2019.03.23
      */
-    private function _newInst()
+    private function newInst()
     {
         $arguments = func_get_args();
         $className = array_shift($arguments);
-        $newClass = function ( $arg ) use ( $className ) {
+        $newClass = function ($arg) use ($className) {
             return new $className($arg);
         };
         return call_user_func_array($newClass, $arguments);
@@ -173,10 +173,8 @@ class Entity
         $p = new \ReflectionMethod($class, $name);
         $ret = array();
         foreach ($p->getParameters() as $n) {
-            $ret[$n->getName()] = $n->isDefaultValueAvailable()
-                ? $n->getDefaultValue():null;
+            $ret[$n->getName()] = $n->isDefaultValueAvailable() ? $n->getDefaultValue():null;
         }
         return $ret;
     }
-
 }

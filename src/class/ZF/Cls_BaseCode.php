@@ -27,7 +27,7 @@ class BaseCode
      *
      * @var array
      */
-    private static $_b91_enctab = array(
+    private static $b91_enctab = array(
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -42,7 +42,7 @@ class BaseCode
      *
      * @var array
      */
-    private static $_b91_dectab;
+    private static $b91_dectab;
 
     /**
      * Base16编码表（已弃用）
@@ -50,7 +50,7 @@ class BaseCode
      * @var        array
      * @deprecated
      */
-    private static $_b16_enctab = array(
+    private static $b16_enctab = array(
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
     );
 
@@ -61,10 +61,10 @@ class BaseCode
      * @static
      * @since  2018.11.13
      */
-    private static function _init()
+    private static function init()
     {
-        if (!self::$_b91_dectab) {
-            self::$_b91_dectab = array_flip(self::$_b91_enctab);
+        if (!self::$b91_dectab) {
+            self::$b91_dectab = array_flip(self::$b91_enctab);
         }
     }
 
@@ -79,14 +79,14 @@ class BaseCode
      */
     public static function base91Decode($d)
     {
-        self::_init();
+        self::init();
         $l = strlen($d);
         $v = -1;
         $b = 0;
         $o = '';
         $n = 0;
         for ($i = 0; $i < $l; ++$i) {
-            $c = self::$_b91_dectab[$d{$i}];
+            $c = self::$b91_dectab[$d{$i}];
             if (!isset($c)) {
                 continue;
             }
@@ -121,7 +121,7 @@ class BaseCode
      */
     public static function base91Encode($d)
     {
-        self::_init();
+        self::init();
         $b = 0;
         $n = 0;
         $o = '';
@@ -139,13 +139,13 @@ class BaseCode
                     $b >>= 14;
                     $n -= 14;
                 }
-                $o .= self::$_b91_enctab[$v % 91] . self::$_b91_enctab[$v / 91];
+                $o .= self::$b91_enctab[$v % 91] . self::$b91_enctab[$v / 91];
             }
         }
         if ($n) {
-            $o .= self::$_b91_enctab[$b % 91];
+            $o .= self::$b91_enctab[$b % 91];
             if ($n > 7 || $b > 90) {
-                $o .= self::$_b91_enctab[$b / 91];
+                $o .= self::$b91_enctab[$b / 91];
             }
         }
         return $o;

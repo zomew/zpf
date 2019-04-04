@@ -21,25 +21,25 @@ class Packet
 {
     /**
      * 生成数据包长度
-     * 
-     * @param string $msg 
-     * @param int    $add 
-     * 
+     *
+     * @param string $msg
+     * @param int    $add
+     *
      * @return string
      */
-    private static function _buildPacketLen($msg, $add = 0)
+    private static function buildPacketLen($msg, $add = 0)
     {
         return pack('N', strlen($msg)+$add);
     }
 
     /**
      * 生成数据包标头
-     * 
-     * @param string $type 
-     * 
+     *
+     * @param string $type
+     *
      * @return string
      */
-    private static function _buildPacketHead($type = '00')
+    private static function buildPacketHead($type = '00')
     {
         $list = str_split($type);
         $l = intval($list[0]) & 0xFF;
@@ -52,26 +52,25 @@ class Packet
 
     /**
      * 将数据打包成二进制数据包
-     * 
-     * @param string $type 
-     * @param string $msg 
-     * 
+     *
+     * @param string $type
+     * @param string $msg
+     *
      * @return string
      */
     public static function buildPacket($type = '00', $msg = '')
     {
-        return self::_buildPacketLen($msg, 0xA) . self::_buildPacketHead($type) . 
-            self::_buildPacketLen($msg) . $msg;
+        return self::buildPacketLen($msg, 0xA) . self::buildPacketHead($type) . self::buildPacketLen($msg) . $msg;
     }
 
     /**
      * 读取二进制包头信息
-     * 
-     * @param string $msg 
-     * 
+     *
+     * @param string $msg
+     *
      * @return array
      */
-    private static function _getPacketHead($msg)
+    private static function getPacketHead($msg)
     {
         $r = unpack('C*', substr($msg, 4, 2));
         $r[1] ^= 0xA;
@@ -81,10 +80,10 @@ class Packet
 
     /**
      * 读取数据包长度
-     * 
-     * @param string $msg 
-     * @param int    $add 
-     * 
+     *
+     * @param string $msg
+     * @param int    $add
+     *
      * @return mixed
      */
     public static function getPacketLen($msg, $add = 0)
@@ -95,15 +94,15 @@ class Packet
 
     /**
      * 解析数据包并较验包头信息是否正确
-     * 
-     * @param string $msg 
-     * 
+     *
+     * @param string $msg
+     *
      * @return array
      */
     public static function getPacket($msg)
     {
         $r = array();
-        $r[0] = self::_getPacketHead($msg);
+        $r[0] = self::getPacketHead($msg);
         if (strlen($msg) > 0xA) {
             $r[1] = substr($msg, 0xA);
         } else {

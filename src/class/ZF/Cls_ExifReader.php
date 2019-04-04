@@ -15,7 +15,8 @@ require_once JPEG_METADATA_DIR . "TagDefinitions/XmpTags.class.php";
 
 class ExifReader
 {
-    private static $_data, $_js;
+    private static $data;
+    private static $js;
 
     public static $title_s = '<ttitle>';
     public static $title_e = '</ttitle>';
@@ -114,7 +115,7 @@ EOF;
                     }
                 }
                 if ($ret) {
-                    self::$_data = $ret;
+                    self::$data = $ret;
                 }
             }
         }
@@ -138,8 +139,8 @@ EOF;
         $f = ZF_ROOT . 'lang/ExifReader_' . $lang . '.php';
 
         if (!$data) {
-            if (self::$_data) {
-                $data = self::$_data;
+            if (self::$data) {
+                $data = self::$data;
             } else {
                 return false;
             }
@@ -160,8 +161,8 @@ EOF;
                     $val = $data['Value'][$k];
                     if (is_int($val)) {
                         if (isset($lang::$value[$k][$val])) {
-                            $r[$k] .= self::$value_s . $lang::$value[$k][$val] .
-                                self::$value_e;
+                            $v = $lang::$value;
+                            $r[$k] .= self::$value_s . $v[$k][$val] . self::$value_e;
                         } else {
                             $r[$k] .= self::$value_s . $v . self::$value_e;
                         }
@@ -169,7 +170,7 @@ EOF;
                         $r[$k] .= self::$value_s . $v . self::$value_e;
                     }
                 } else {
-                    $r[$k] .= self::$value_s . $v . self::$value_e;;
+                    $r[$k] .= self::$value_s . $v . self::$value_e;
                 }
             }
         } else {
@@ -232,8 +233,7 @@ EOF;
             $js .= "\"{$x}\",\r\n";
         }
         $js .= "].join('\\n')";
-        self::$_js = $js;
+        self::$js = $js;
         return $r;
     }
 }
-

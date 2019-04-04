@@ -19,33 +19,33 @@ namespace ZF;
  */
 class MchPay
 {
-    private $_config = array();
+    private $config = array();
 
     /**
      * 实体化类的时候需要传入的参数，可以是公众号相关配置信息，也可以是Config里的配置名称，
      * 如：ANJU 自动获取 \Config::$ANJU_CONFIG 里的配置信息
      * MchPay constructor.
-     * 
-     * @param string $name 
+     *
+     * @param string $name
      */
     public function __construct($name = '')
     {
-        self::_loadConfig();
+        self::loadConfig();
         if ($name) {
             if (is_string($name)) {
                 $name = strtoupper($name)."_CONFIG";
                 if (isset(\Config::${$name}) && isset(\Config::${$name}['mp'])) {
-                    $this->_config = \Config::${$name}['mp'];
+                    $this->config = \Config::${$name}['mp'];
                 }
-            } else if (is_array($name)) {
-                $this->_config = $name;
+            } elseif (is_array($name)) {
+                $this->config = $name;
             }
         }
-        if (!(isset($this->_config['appid']) 
-            && isset($this->_config['mch_id']) 
-            && isset($this->_config['pay_key']) 
-            && isset($this->_config['cert']) 
-            && isset($this->_config['keys']))
+        if (!(isset($this->config['appid'])
+            && isset($this->config['mch_id'])
+            && isset($this->config['pay_key'])
+            && isset($this->config['cert'])
+            && isset($this->config['keys']))
         ) {
             trigger_error('Config not exist!', E_USER_ERROR);
         }
@@ -58,7 +58,7 @@ class MchPay
      * @static
      * @since  2019.03.23
      */
-    private static function _loadConfig()
+    private static function loadConfig()
     {
         if (!class_exists('\Config')) {
             $uname = php_uname('n');
@@ -82,24 +82,24 @@ class MchPay
      * @return array
      * @since  2018.12.14
      */
-    private function _buildSSLArray()
+    private function buildSSLArray()
     {
         $ret = array(
             'SSLCERTTYPE' => 'PEM',
-            'SSLCERT' => $this->_config['cert'],
+            'SSLCERT' => $this->config['cert'],
             'SSLKEYTYPE' => 'PEM',
-            'SSLKEY' => $this->_config['keys'],
+            'SSLKEY' => $this->config['keys'],
         );
         return $ret;
     }
     
     /**
      * 企业付款至零钱
-     * 
-     * @param string $tno 
-     * @param string $openid 
-     * @param float  $amount 
-     * @param string $desc 
+     *
+     * @param string $tno
+     * @param string $openid
+     * @param float  $amount
+     * @param string $desc
      *
      * @return array|bool|mixed
      * @since  2018.12.14
@@ -110,20 +110,19 @@ class MchPay
         if ($openid && $amount > 0 && $desc) {
             $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers';
             $params = array(
-                'mch_appid' => $this->_config['appid'],
-                'mchid' => $this->_config['mch_id'],
+                'mch_appid' => $this->config['appid'],
+                'mchid' => $this->config['mch_id'],
                 'nonce_str' => Wepay::getNonceStr(),
-                'partner_trade_no' => $tno ? $tno : 
-                    md5("{$openid}{$amount}{$desc}" . microtime(true)),
+                'partner_trade_no' => $tno ? $tno : md5("{$openid}{$amount}{$desc}" . microtime(true)),
                 'openid' => $openid,
                 'check_name' => 'NO_CHECK',
                 'amount' => intval($amount * 100),
                 'desc' => $desc,
                 'spbill_create_ip' => Common::GetIP(),
             );
-            $params['sign'] = Wepay::MakeSign($params, $this->_config['pay_key']);
-            $xml = Wepay::xml_encode($params);
-            $r = Common::_postRequest($url, $xml, $this->_buildSSLArray());
+            $params['sign'] = Wepay::MakeSign($params, $this->config['pay_key']);
+            $xml = Wepay::xmlEncode($params);
+            $r = Common::postRequest($url, $xml, $this->buildSSLArray());
             if ($r) {
                 $tmp = Wepay::xml2array($r);
                 if (isset($tmp['return_code'])) {
@@ -136,8 +135,8 @@ class MchPay
     
     /**
      * 查询30天内订单付款情况
-     * 
-     * @param string $partner_trade_no 
+     *
+     * @param string $partner_trade_no
      *
      * @return array|bool|mixed
      * @since  2018.12.14
@@ -151,12 +150,12 @@ class MchPay
             $params = array(
                 'nonce_str' => Wepay::getNonceStr(),
                 'partner_trade_no' => $partner_trade_no,
-                'mch_id' => $this->_config['mch_id'],
-                'appid' => $this->_config['appid'],
+                'mch_id' => $this->config['mch_id'],
+                'appid' => $this->config['appid'],
             );
-            $params['sign'] = Wepay::MakeSign($params, $this->_config['pay_key']);
-            $xml = Wepay::xml_encode($params);
-            $r = Common::_postRequest($url, $xml, $this->_buildSSLArray());
+            $params['sign'] = Wepay::MakeSign($params, $this->config['pay_key']);
+            $xml = Wepay::xmlEncode($params);
+            $r = Common::postRequest($url, $xml, $this->buildSSLArray());
             if ($r) {
                 $tmp = Wepay::xml2array($r);
                 if (isset($tmp['return_code'])) {
@@ -169,30 +168,30 @@ class MchPay
     
     /**
      * 企业付款至银行卡
-     * 
-     * @param string $tno 
-     * @param string $bno 
-     * @param string $bname 
-     * @param string $bcode 
-     * @param float  $amount 
-     * @param string $desc 
+     *
+     * @param string $tno
+     * @param string $bno
+     * @param string $bname
+     * @param string $bcode
+     * @param float  $amount
+     * @param string $desc
      *
      * @return array|bool|mixed
      * @since  2018.12.14
      */
     public function payBank(
-        $tno = '', 
-        $bno = '', 
-        $bname = '', 
-        $bcode = '', 
-        $amount = 0.0, 
+        $tno = '',
+        $bno = '',
+        $bname = '',
+        $bcode = '',
+        $amount = 0.0,
         $desc = ''
     ) {
         $ret = array();
         if ($bno && $bname && $bcode && $amount > 0) {
             $url = 'https://api.mch.weixin.qq.com/mmpaysptrans/pay_bank';
             $params = array(
-                'mch_id' => $this->_config['mch_id'],
+                'mch_id' => $this->config['mch_id'],
                 'partner_trade_no' => $tno ? $tno :
                     md5("{$bno}_{$bname}_{$bcode}{$amount}{$desc}"),
                 'nonce_str' => Wepay::getNonceStr(),
@@ -202,9 +201,9 @@ class MchPay
                 'amount' => intval($amount * 100),
                 'desc' => $desc,
             );
-            $params['sign'] = Wepay::MakeSign($params, $this->_config['pay_key']);
-            $xml = Wepay::xml_encode($params);
-            $r = Common::_postRequest($url, $xml, $this->_buildSSLArray());
+            $params['sign'] = Wepay::MakeSign($params, $this->config['pay_key']);
+            $xml = Wepay::xmlEncode($params);
+            $r = Common::postRequest($url, $xml, $this->buildSSLArray());
             if ($r) {
                 $tmp = Wepay::xml2array($r);
                 if (isset($tmp['return_code'])) {
@@ -222,9 +221,9 @@ class MchPay
      * @return bool|string
      * @since  2018.12.14
      */
-    private function _getpublickey()
+    private function getpublickey()
     {
-        $keys = ZF_ROOT . 'secret/'. $this->_config['appid'] . 
+        $keys = ZF_ROOT . 'secret/'. $this->config['appid'] .
             md5(php_uname()) . '.pub';
         $ret = '';
         $path = pathinfo($keys, PATHINFO_DIRNAME);
@@ -236,12 +235,12 @@ class MchPay
         } else {
             $url = 'https://fraud.mch.weixin.qq.com/risk/getpublickey';
             $params = array(
-                'mch_id' => $this->_config['mch_id'],
+                'mch_id' => $this->config['mch_id'],
                 'nonce_str' => Wepay::getNonceStr(),
             );
-            $params['sign'] = Wepay::MakeSign($params, $this->_config['pay_key']);
-            $xml = Wepay::xml_encode($params);
-            $r = Common::_postRequest($url, $xml, $this->_buildSSLArray());
+            $params['sign'] = Wepay::MakeSign($params, $this->config['pay_key']);
+            $xml = Wepay::xmlEncode($params);
+            $r = Common::postRequest($url, $xml, $this->buildSSLArray());
             if ($r) {
                 $tmp = Wepay::xml2array($r);
                 if (isset($tmp['return_code']) && $tmp['return_code'] == 'SUCCESS'
@@ -257,8 +256,8 @@ class MchPay
     
     /**
      * 微信付款到银行卡，敏感信息加密
-     * 
-     * @param string $info 
+     *
+     * @param string $info
      *
      * @return bool|string
      * @since  2018.12.14
@@ -267,7 +266,7 @@ class MchPay
     {
         $ret = '';
         if ($info) {
-            $ret = DataSafe::RsaPubEncrypt($info, $this->_getpublickey());
+            $ret = DataSafe::RsaPubEncrypt($info, $this->getpublickey());
         }
         return $ret;
     }
@@ -286,13 +285,13 @@ class MchPay
         if ($tno) {
             $url = 'https://api.mch.weixin.qq.com/mmpaysptrans/query_bank';
             $params = array(
-                'mch_id' => $this->_config['mch_id'],
+                'mch_id' => $this->config['mch_id'],
                 'partner_trade_no' => $tno,
                 'nonce_str' => Wepay::getNonceStr(),
             );
-            $params['sign'] = Wepay::MakeSign($params, $this->_config['pay_key']);
-            $xml = Wepay::xml_encode($params);
-            $r = Common::_postRequest($url, $xml, $this->_buildSSLArray());
+            $params['sign'] = Wepay::MakeSign($params, $this->config['pay_key']);
+            $xml = Wepay::xmlEncode($params);
+            $r = Common::postRequest($url, $xml, $this->buildSSLArray());
             if ($r) {
                 $tmp = Wepay::xml2array($r);
                 if (isset($tmp['return_code'])) {

@@ -11,7 +11,6 @@ require_once __DIR__ . '/../src/__INIT.php';
 
 /**
  * Class CommonTest
- *
  * @author  Jamers <jamersnox@zomew.net>
  * @license https://opensource.org/licenses/GPL-3.0 GPL
  * @since   2019.03.24
@@ -21,7 +20,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * SpecialReplace Tests
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -29,23 +27,21 @@ class CommonTest extends PHPUnit\Framework\TestCase
     {
         $str1 = 'Hello, (@name@)！(@1@) (@any@)';
         $str2 = 'Hello, {{name}}！{{1}} {{any}}';
-        $data = array(
+        $data = [
             'name' => 'World',
-            1   => 'php',
-        );
+            1 => 'php',
+        ];
         $result = 'Hello, World！php ';
         $this->assertEquals($result, \ZF\Common::specialReplace($str1, $data));
         $this->assertEquals(
             $result,
-            \ZF\Common::specialReplace($str2,  $data,  array('{{', '}}',))
+            \ZF\Common::specialReplace($str2, $data, ['{{', '}}',])
         );
     }
 
     /**
      * Request Tests
-     *
      * @requires PHPUnit 8.0.4
-     *
      * @return void
      */
     public function testRequest()
@@ -62,7 +58,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * SaveLog Tests
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -80,7 +75,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Input Tests
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -110,7 +104,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * StrReplaceOnce Tests
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -128,7 +121,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function teststrReplaceLimit
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -158,7 +150,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testjsonStr
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -174,7 +165,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testLockFile
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -190,7 +180,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testgetNeedArray
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -198,7 +187,7 @@ class CommonTest extends PHPUnit\Framework\TestCase
     {
         $data = ['s1' => 'SS1', 's2' => 'SSS2', 2 => 'Int2', '5' => 'String5',
             's4' => ['test' => 'Subvalue', 'name' => 'php',],
-            ];
+        ];
         $list1 = ['s1', '5', 's3',];
         $list2 = 's1,5,s3';
         $ret = ['s1' => 'SS1', '5' => 'String5', 's3' => null,];
@@ -207,12 +196,10 @@ class CommonTest extends PHPUnit\Framework\TestCase
         $list1 = ['Name1' => '5', 'Key' => 's4.test', 'Static' => ':001',];
         $ret = ['Name1' => 'String5', 'Key' => 'Subvalue', 'Static' => '001',];
         $this->assertEquals($ret, \ZF\Common::getNeedArray($data, $list1));
-
     }
 
     /**
      * Function testGuid
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -222,12 +209,10 @@ class CommonTest extends PHPUnit\Framework\TestCase
         $this->assertTrue(\ZF\Common::isGuid($guid));
         $guid = \ZF\Common::tagGuid();
         $this->assertTrue(\ZF\Common::checkTagGuid($guid));
-
     }
 
     /**
      * Function testgetPathInfo
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -244,7 +229,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testgetSelfUrl
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -261,7 +245,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testphoneMask
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -283,7 +266,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testrandStr
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -300,7 +282,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testisAjax
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -309,12 +290,10 @@ class CommonTest extends PHPUnit\Framework\TestCase
         $this->assertFalse(\ZF\Common::isAjax());
         $_SERVER['HTTP_X_REQUESTED_WITH'] = 'XmlHttpRequest';
         $this->assertTrue(\ZF\Common::isAjax());
-
     }
 
     /**
      * Function testgetHost
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -326,7 +305,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testmbStringToArray
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -343,7 +321,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testpaging
-     *
      * @return void
      * @since  2019.03.24
      */
@@ -360,7 +337,6 @@ class CommonTest extends PHPUnit\Framework\TestCase
 
     /**
      * Function testSkip
-     *
      * @return void
      * @since  2019.03.24
      */

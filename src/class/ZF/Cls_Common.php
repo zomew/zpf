@@ -12,7 +12,7 @@ namespace ZF;
  *
  * @since 2018.06.02
  */
-Class Common
+class Common
 {
     /**
      * SSL双向证书认证连接配置文件
@@ -40,7 +40,7 @@ Class Common
      */
     public static function specialReplace(
         $str,
-        $ary=array(),
+        $ary = array(),
         $dim = array('(@','@)')
     ) {
         $l = str_replace('(', '\(', $dim[0]);
@@ -115,7 +115,7 @@ Class Common
                 $value = '';
                 if (isset($ssl[$k]) && $ssl[$k]) {
                     $value = $ssl[$k];
-                } else if (trim($v)) {
+                } elseif (trim($v)) {
                     $value = $v;
                 }
                 if ($value) {
@@ -171,7 +171,7 @@ Class Common
                 $value = '';
                 if (isset($ssl[$k]) && $ssl[$k]) {
                     $value = $ssl[$k];
-                } else if (trim($v)) {
+                } elseif (trim($v)) {
                     $value = $v;
                 }
                 if ($value) {
@@ -256,7 +256,7 @@ Class Common
      * @static
      * @since  2019.03.23
      */
-    public static function input($ary = '', $def='')
+    public static function input($ary = '', $def = '')
     {
         $ret = array();
         $val = $_REQUEST;
@@ -355,7 +355,7 @@ Class Common
     {
         // constructing mask(s)...
         if (is_array($search)) {
-            foreach ($search as $k=>$v) {
+            foreach ($search as $k => $v) {
                 $search[$k] = '`' . preg_quote($search[$k], '`') . '`';
             }
         } else {
@@ -532,7 +532,7 @@ Class Common
     {
         return preg_replace_callback(
             '/[xy]/i',
-            function ( $m ) {
+            function ($m) {
                 $r = rand(0, 15);
                 return dechex(strtolower($m[0]) == 'x'?$r:($r&0x3|0x8));
             },
@@ -567,7 +567,7 @@ Class Common
     public static function getPathInfo()
     {
         $ret = '';
-        switch(true) {
+        switch (true) {
             case (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO']):
                 return $_SERVER['PATH_INFO'];
                 break;
@@ -670,7 +670,7 @@ Class Common
         }
         if ($len > 0 && strlen($list) > 0) {
             while (strlen($ret)<$len) {
-                $ret .= substr($list,  mt_rand(0, strlen($list)-1),  1);
+                $ret .= substr($list, mt_rand(0, strlen($list)-1), 1);
             }
         }
         return $ret;
@@ -743,7 +743,7 @@ Class Common
         if (isset($_SERVER['HTTP_ACCEPT'])) {
             // 如果只支持wml并且不支持html那一定是移动设备
             // 如果支持wml和html但是wml在html之前则是移动设备
-            if ((strpos($_SERVER['HTTP_ACCEPT'],  'vnd.wap.wml') !== false)
+            if ((strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') !== false)
                 && (strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false || (strpos($_SERVER['HTTP_ACCEPT'], 'vnd.wap.wml') < strpos($_SERVER['HTTP_ACCEPT'], 'text/html')))
             ) {
                 return true;
@@ -883,8 +883,8 @@ Class Common
                 $str = '|((?:[^\/]*?(?:' .implode('|', $list) . ')))';
             }
             if (preg_match(
-                '%^\s*https?://((?:192\.168\.|127\.0\.0\.1|localhost)' .
-                $str .')%i', $origin
+                '%^\s*https?://((?:192\.168\.|127\.0\.0\.1|localhost)' . $str . ')%i',
+                $origin
             )
             ) {
                 $ret = true;

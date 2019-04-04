@@ -31,7 +31,7 @@ class ComposerBase
      *
      * @var string
      */
-    private $_basename = '';
+    private $basename = '';
 
     /**
      * 实际类调用的一级路径：例如在 \Twig\Loader\FilesystemLoader 中为\Twig
@@ -45,7 +45,7 @@ class ComposerBase
      *
      * @var array
      */
-    private $_maped = array();
+    private $maped = array();
 
     /**
      * ComposerBase实例化，初始化部分参数
@@ -57,17 +57,17 @@ class ComposerBase
     public function __construct($name = '', $root = '', $dir = '')
     {
         if ($name) {
-            $this->_basename = $name;
+            $this->basename = $name;
         }
         if ($root) {
             $this->root = $root;
         }
-        if (!$this->_maped && $root) {
+        if (!$this->maped && $root) {
             $file = self::getMapFile($root);
             if (file_exists($file)) {
-                $this->_maped = include $file;
+                $this->maped = include $file;
             } else {
-                $this->_maped = self::createMapFiles($dir, $root);
+                $this->maped = self::createMapFiles($dir, $root);
             }
         }
     }
@@ -90,12 +90,12 @@ class ComposerBase
                 $this->$name = new $cls();
                 $ret = $this->$name;
                 $err = false;
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $name = $cls;
             }
-        } else if (isset($this->_maped[$name])) {
-            if ($this->_basename) {
-                $name = $this->_basename . "\\{$name}";
+        } elseif (isset($this->maped[$name])) {
+            if ($this->basename) {
+                $name = $this->basename . "\\{$name}";
             }
             $err = false;
             $ret = new self($name, $this->root);
@@ -125,9 +125,9 @@ class ComposerBase
                 return $this->$name;
             }
         } else {
-            if ($this->_basename && isset($this->_maped[$this->_basename])) {
-                if (in_array($name, $this->_maped[$this->_basename])) {
-                    $cls = "{$this->root}\\{$this->_basename}\\{$name}";
+            if ($this->basename && isset($this->maped[$this->basename])) {
+                if (in_array($name, $this->maped[$this->basename])) {
+                    $cls = "{$this->root}\\{$this->basename}\\{$name}";
                     $name = $cls;
                     if (class_exists($cls)) {
                         $this->$name = self::newInstance($cls, $param);
@@ -176,7 +176,8 @@ class ComposerBase
      * @static
      * @since  2019.03.21
      */
-    public static function createMapFiles($dir = ZF_ROOT . "vendor/twig/twig/src/",
+    public static function createMapFiles(
+        $dir = ZF_ROOT . "vendor/twig/twig/src/",
         $root = '\\Twig'
     ) {
         $ret = array();
@@ -197,7 +198,7 @@ class ComposerBase
                                 $ret[$key][] = $value;
                             }
                         }
-                    }catch(\Exception $e) {
+                    } catch (\Exception $e) {
                     }
                 }
             }

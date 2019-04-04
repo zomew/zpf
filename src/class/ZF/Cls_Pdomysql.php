@@ -1,6 +1,6 @@
 <?php
-
 namespace ZF;
+
 /**
  * Desc: php操作mysql的封装类
  * Author lichuang
@@ -33,7 +33,7 @@ class Pdomysql
 {
     /**
      * PDO数据库对象
-     * 
+     *
      * @var \PDO
      */
     protected $dbh = null; //静态属性,所有数据库实例共用,避免重复连接数据库
@@ -62,7 +62,7 @@ class Pdomysql
 
     /**
      * 初始化类
-     * 
+     *
      * @param array $conf 数据库配置
      */
     public function __construct(array $conf = array())
@@ -98,9 +98,9 @@ class Pdomysql
 
     /**
      * 取表名
-     * 
-     * @param string $tblname 
-     * 
+     *
+     * @param string $tblname
+     *
      * @return string
      */
     public function getTablename($tblname = '')
@@ -123,9 +123,9 @@ class Pdomysql
 
     /**
      * 设置表前缀
-     * 
-     * @param string $value 
-     * 
+     *
+     * @param string $value
+     *
      * @return bool
      */
     public function setTblPrefix($value)
@@ -136,7 +136,7 @@ class Pdomysql
 
     /**
      * 取表前缀
-     * 
+     *
      * @return mixed|string
      */
     public function getTblPrefix()
@@ -152,8 +152,7 @@ class Pdomysql
      */
     protected function connect()
     {
-        $dsn = $this->dbType . ':host=' . $this->host . ';port=' . $this->port .
-            ';dbname=' . $this->dbName;
+        $dsn = $this->dbType . ':host=' . $this->host . ';port=' . $this->port . ';dbname=' . $this->dbName;
         $options = $this->pconnect ? array(\PDO::ATTR_PERSISTENT => true) : array();
         try {
             $dbh = new \PDO($dsn, $this->user, $this->pass, $options);
@@ -169,15 +168,15 @@ class Pdomysql
     /**
      * 字段和表名添加 `符号
      * 保证指令中使用关键字不出错 针对mysql
-     * 
-     * @param string $value 
-     * 
+     *
+     * @param string $value
+     *
      * @return string
      */
     protected function addChar($value)
     {
-        if ('*' == $value || false !== strpos($value, '(') 
-            || false !== strpos($value, '.') 
+        if ('*' == $value || false !== strpos($value, '(')
+            || false !== strpos($value, '.')
             || false !== strpos($value, '`')
         ) {
             //如果包含* 或者 使用了sql方法 则不作处理
@@ -189,9 +188,9 @@ class Pdomysql
 
     /**
      * 取得数据表的字段信息
-     * 
+     *
      * @param string $tbName 表名
-     * 
+     *
      * @return array
      */
     protected function tbFields($tbName)
@@ -200,8 +199,7 @@ class Pdomysql
         if (isset($this->fieldList[$tbName])) {
             return $this->fieldList[$tbName];
         }
-        $sql = 'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS ' .
-            'WHERE TABLE_NAME=:tbName AND TABLE_SCHEMA=:dbName ';
+        $sql = 'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=:tbName AND TABLE_SCHEMA=:dbName ';
         $stmt = $this->dbh->prepare($sql);
         $stmt->execute(array('tbName' => $tbName, 'dbName' => $this->dbName,));
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -215,10 +213,10 @@ class Pdomysql
 
     /**
      * 过滤并格式化数据表字段
-     * 
+     *
      * @param string $tbName 数据表名
      * @param array  $data   POST提交数据
-     * 
+     *
      * @return array $newdata
      */
     protected function dataFormat($tbName, $data)
@@ -239,10 +237,7 @@ class Pdomysql
                     $val = intval($val);
                 } elseif (is_float($val)) {
                     $val = floatval($val);
-                } elseif (preg_match(
-                    '%^\s*(?:\(\w*(\+|\-|\*|/)?\w*\)|.*?`[\w\d]+`.*?)\s*$%i', $val
-                )
-                ) {
+                } elseif (preg_match('%^\s*(?:\(\w*(\+|\-|\*|/)?\w*\)|.*?`[\w\d]+`.*?)\s*$%i', $val)) {
                     // 支持在字段的值里面直接使用其它字段 ,例如 (score+1) (name) 必须包含括号
                     //$val = $val;
                 } elseif (is_string($val)) {
@@ -256,14 +251,14 @@ class Pdomysql
 
     /**
      * 执行查询 主要针对 SELECT, SHOW 等指令
-     * 
+     *
      * @param string $sql sql指令
-     * 
+     *
      * @return mixed
      */
     protected function doQuery($sql = '')
     {
-        $this->_checkconn();
+        $this->checkconn();
         $this->sql = $sql;
         $pdostmt = $this->dbh->prepare($this->sql); //prepare或者query 返回一个PDOStatement
         $this->l_where_array = $this->where_array;
@@ -274,9 +269,9 @@ class Pdomysql
 
     /**
      * 执行语句 针对 INSERT, UPDATE 以及DELETE,exec结果返回受影响的行数
-     * 
+     *
      * @param string $sql sql指令
-     * 
+     *
      * @return integer
      */
     protected function doExec($sql = '')
@@ -284,17 +279,13 @@ class Pdomysql
         if ($this->clear > 0) {
             $this->clear();
         }
-        $this->_checkconn();
+        $this->checkconn();
         $ok = true;
         if ($this->where_array) {
             foreach ($this->where_array as $k => $v) {
-                $sql = str_replace(
-                    ':' . $k . ' ', 
-                    "'" . str_replace("'", "\'", $v) . "' ",
-                    $sql
-                );
+                $sql = str_replace(':' . $k . ' ', "'" . str_replace("'", "\'", $v) . "' ", $sql);
             }
-            $rs = $this->select('count(*) as ct')->_select();
+            $rs = $this->select('count(*) as ct')->prvSelect();
             if ($rs[0]['ct'] <= 0) {
                 $ok = false;
             }
@@ -311,17 +302,16 @@ class Pdomysql
 
     /**
      * 执行sql语句，自动判断进行查询或者执行操作
-     * 
+     *
      * @param string $sql SQL指令
-     * 
+     *
      * @return mixed
      */
     public function doSql($sql = '')
     {
         $this->clear();
-        $queryIps = 'INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|LOAD DATA|SELECT'.
-            '.* INTO|COPY|ALTER|GRANT|REVOKE|LOCK|UNLOCK';
-        if (preg_match('/^\s*"?(' . $queryIps . ')\s+/i', $sql)) {
+        $qIps = 'INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|LOAD DATA|SELECT.* INTO|COPY|ALTER|GRANT|REVOKE|LOCK|UNLOCK';
+        if (preg_match('/^\s*"?(' . $qIps . ')\s+/i', $sql)) {
             return $this->doExec($sql);
         } else {
             //查询操作
@@ -331,28 +321,24 @@ class Pdomysql
 
     /**
      * 获取最近一次查询的sql语句
-     * 
+     *
      * @return string 执行的SQL
      */
     public function getLastSql()
     {
         $ret = $this->sql;
         foreach ($this->l_where_array as $k => $v) {
-            $ret = str_replace(
-                ':' . $k . ' ', 
-                "'" . str_replace("'", "\'", $v) . "' ", 
-                $ret
-            );
+            $ret = str_replace(':' . $k . ' ', "'" . str_replace("'", "\'", $v) . "' ", $ret);
         }
         return $ret;
     }
 
     /**
      * 插入方法
-     * 
+     *
      * @param string $tbName 操作的数据表名
      * @param array  $data   字段-值的一维数组
-     * 
+     *
      * @return int 受影响的行数
      */
     public function insert($tbName, array $data)
@@ -369,10 +355,10 @@ class Pdomysql
 
     /**
      * 批量插入数据
-     * 
-     * @param string $tbName 
-     * @param array  $data 
-     * 
+     *
+     * @param string $tbName
+     * @param array  $data
+     *
      * @return int
      */
     public function insertBatch($tbName, array $data)
@@ -385,8 +371,7 @@ class Pdomysql
             if (!$value) {
                 return $ret;
             }
-            $sql = "insert into `" . $tbName . "` (" . 
-                implode(',', array_keys($value)) . ") values ";
+            $sql = "insert into `" . $tbName . "` (" . implode(',', array_keys($value)) . ") values ";
             $list = array();
             $list[] = "(" . implode(',', array_values($value)) . ")";
             while ($data) {
@@ -404,9 +389,9 @@ class Pdomysql
 
     /**
      * 删除方法
-     * 
+     *
      * @param string $tbName 操作的数据表名
-     * 
+     *
      * @return int 受影响的行数
      */
     public function delete($tbName)
@@ -422,11 +407,11 @@ class Pdomysql
 
     /**
      * 批量删除方法
-     * 
-     * @param string $tbName 
-     * @param array  $data 
-     * @param string $in_logic 
-     * 
+     *
+     * @param string $tbName
+     * @param array  $data
+     * @param string $in_logic
+     *
      * @return int
      * @since  2018.12.05
      */
@@ -445,10 +430,10 @@ class Pdomysql
 
     /**
      * 更新函数
-     * 
+     *
      * @param string $tbName 操作的数据表名
      * @param array  $data   参数数组
-     * 
+     *
      * @return int 受影响的行数
      */
     public function update($tbName, array $data)
@@ -460,7 +445,7 @@ class Pdomysql
         }
         $data = $this->dataFormat($tbName, $data);
         if (!$data) {
-            return;
+            return 0;
         }
         $valArr = array();
         foreach ($data as $k => $v) {
@@ -474,19 +459,19 @@ class Pdomysql
 
     /**
      * 查询函数
-     * 
+     *
      * @param string $tbName 操作的数据表名
-     * 
+     *
      * @return array 结果集
      */
-    private function _select($tbName = '')
+    private function prvSelect($tbName = '')
     {
         if ($this->clear > 0) {
             $this->clear();
         }
         $tbName = $this->getTablename($tbName);
         $sql = "select " . trim($this->field) . " from `" . $tbName . "` " .
-            trim($this->where) . " " . trim($this->group) . " " . 
+            trim($this->where) . " " . trim($this->group) . " " .
             trim($this->order) . " " . trim($this->limit);
         $this->clear = 1;
         return $this->doQuery(trim($sql));
@@ -494,10 +479,10 @@ class Pdomysql
 
     /**
      * 用于执行前进行查看查询语句，主要用于调试
-     * 
+     *
      * @param string $tbName 表名
      * @param bool   $clean  是否清除where数据
-     * 
+     *
      * @return mixed|string
      */
     public function getSql($tbName = '', $clean = false)
@@ -508,7 +493,7 @@ class Pdomysql
             trim($this->order) . " " . trim($this->limit);
         foreach ($this->where_array as $k => $v) {
             $sql = str_replace(
-                ':' . $k . ' ', 
+                ':' . $k . ' ',
                 "'" . str_replace("'", "\'", $v) . "' ",
                 $sql
             );
@@ -521,26 +506,26 @@ class Pdomysql
 
     /**
      * 获取所有数组
-     * 
-     * @param string $tbName 
-     * 
+     *
+     * @param string $tbName
+     *
      * @return array
      */
     public function getAll($tbName = '')
     {
-        return $this->_select($tbName);
+        return $this->prvSelect($tbName);
     }
 
     /**
      * 获取单条记录
-     * 
-     * @param string $tbName 
-     * 
+     *
+     * @param string $tbName
+     *
      * @return array
      */
     public function getOne($tbName = '')
     {
-        $rs = $this->limit('1')->select($tbName);
+        $rs = $this->limit('1')->prvSelect($tbName);
         $ret = array();
         if ($rs && isset($rs[0])) {
             $ret = $rs[0];
@@ -550,15 +535,15 @@ class Pdomysql
 
     /**
      * 统计记录条数
-     * 
-     * @param string $tbName 
-     * 
+     *
+     * @param string $tbName
+     *
      * @return int
      */
     public function count($tbName = '')
     {
         $ret = 0;
-        $rs = $this->select('count(*) as _cnt_')->select($tbName);
+        $rs = $this->select('count(*) as _cnt_')->prvSelect($tbName);
         if (is_array($rs) && isset($rs[0]['_cnt_'])) {
             $ret = intval($rs[0]['_cnt_']);
         }
@@ -568,9 +553,9 @@ class Pdomysql
     /**
      * 字段值求和
      *
-     * @param string $field 
-     * @param string $tbName 
-     * 
+     * @param string $field
+     * @param string $tbName
+     *
      * @return float|int
      * @since  2019.01.22
      */
@@ -578,7 +563,7 @@ class Pdomysql
     {
         $ret = 0;
         if ($field) {
-            $rs = $this->select("sum(`{$field}`) as _sum_")->select($tbName);
+            $rs = $this->select("sum(`{$field}`) as _sum_")->prvSelect($tbName);
             if (is_array($rs) && isset($rs[0]['_sum_'])) {
                 $ret = floatval($rs[0]['_sum_']);
             }
@@ -588,9 +573,9 @@ class Pdomysql
 
     /**
      * 添加From条件
-     * 
-     * @param string $tbName 
-     * 
+     *
+     * @param string $tbName
+     *
      * @return $this
      */
     public function from($tbName = '')
@@ -603,45 +588,44 @@ class Pdomysql
 
     /**
      * Where in 查询
-     * 
-     * @param array  $option 
-     * @param string $logic 
-     * @param string $outlogic 
-     * 
+     *
+     * @param array  $option
+     * @param string $logic
+     * @param string $outlogic
+     *
      * @return Pdomysql
      */
     public function wherein($option, $logic = 'and', $outlogic = 'and')
     {
-        return $this->_whereNotIn($option, $logic, false, $outlogic);
+        return $this->prvWhereNotIn($option, $logic, false, $outlogic);
     }
 
     /**
      * Where not in 查询
-     * 
-     * @param array  $option 
-     * @param string $logic 
-     * @param string $outlogic 
-     * 
+     *
+     * @param array  $option
+     * @param string $logic
+     * @param string $outlogic
+     *
      * @return Pdomysql
      */
     public function wherenotin($option, $logic = 'and', $outlogic = 'and')
     {
-        return $this->_whereNotIn($option, $logic, true, $outlogic);
+        return $this->prvWhereNotIn($option, $logic, true, $outlogic);
     }
 
     /**
      * Where in 及 Where not in相关数据
-     * 
-     * @param array  $option 
-     * @param string $logic 
-     * @param bool   $isnotin 
-     * @param string $outlogic 
-     * 
+     *
+     * @param array  $option
+     * @param string $logic
+     * @param bool   $isnotin
+     * @param string $outlogic
+     *
      * @return $this
      */
-    private function _whereNotIn($option,$logic = 'and',$isnotin = false,
-        $outlogic = 'and'
-    ) {
+    private function prvWhereNotIn($option, $logic = 'and', $isnotin = false, $outlogic = 'and')
+    {
         if ($option) {
             if ($this->clear > 0) {
                 $this->clear();
@@ -661,17 +645,13 @@ class Pdomysql
                 $ismark = false;
                 foreach ($option as $k => $v) {
                     if (is_array($v) && $v) {
-                        $condition = ' (' . $this->addChar($k) . 
-                            " {$opt} (" . $this->_addQuote($v) . '))';
-                        $this->where .= $ismark ? 
-                            " {$logic} {$condition}" : $condition;
+                        $condition = ' (' . $this->addChar($k) . " {$opt} (" . $this->addQuote($v) . '))';
+                        $this->where .= $ismark ? " {$logic} {$condition}" : $condition;
                         $ismark = true;
                     }
                     if (is_string($v) && $v) {
-                        $condition = ' (' . $this->addChar($k) .
-                            " {$opt} (" . $v . '))';
-                        $this->where .= $ismark ?
-                            " {$logic} {$condition}" : $condition;
+                        $condition = ' (' . $this->addChar($k) . " {$opt} (" . $v . '))';
+                        $this->where .= $ismark ? " {$logic} {$condition}" : $condition;
                         $ismark = true;
                     }
                 }
@@ -683,12 +663,12 @@ class Pdomysql
 
     /**
      * 给数据添加引号
-     * 
-     * @param array $ary 
-     * 
+     *
+     * @param array $ary
+     *
      * @return string
      */
-    private function _addQuote($ary = array())
+    private function addQuote($ary = array())
     {
         $ret = '';
         if ($ary && is_array($ary)) {
@@ -705,11 +685,11 @@ class Pdomysql
 
     /**
      * Where条件
-     * 
+     *
      * @param mixed  $option   组合条件的二维数组，例：$option['field1'] = array(1,'>=','or')
      * @param string $logic    逻辑操作符
      * @param string $outlogic 外层逻辑操作符
-     * 
+     *
      * @return $this
      */
     public function where($option, $logic = 'and', $outlogic = 'and')
@@ -765,8 +745,7 @@ class Pdomysql
                             } else {
                                 $tag = $this->getWhereTag($k);
                                 $this->where_array[$tag] = $v[0];
-                                $condition = '(' . $this->addChar($k) . ' ' . 
-                                    $relative . ' :' . $tag . ' )';
+                                $condition = '(' . $this->addChar($k) . ' ' . $relative . ' :' . $tag . ' )';
                             }
                         }
                     } else {
@@ -774,8 +753,8 @@ class Pdomysql
                         if (preg_match('/`.*`/i', $v)) {
                             $condition = '(' . $this->addChar($k) . '=' . $v . ')';
                         } else {
-                            if (false !== strpos($k, '(') 
-                                || false !== strpos($k, '.') 
+                            if (false !== strpos($k, '(')
+                                || false !== strpos($k, '.')
                                 || false !== strpos($k, '`')
                             ) {
                                 $condition = '(' . $this->addChar($k) . '=\'' .
@@ -799,9 +778,9 @@ class Pdomysql
 
     /**
      * 设置排序
-     * 
+     *
      * @param mixed $option 排序条件数组 例:array('sort'=>'desc')
-     * 
+     *
      * @return $this
      */
     public function order($option)
@@ -826,10 +805,10 @@ class Pdomysql
 
     /**
      * 设置查询行数及页数
-     * 
+     *
      * @param int $page     pageSize不为空时为页数，否则为行数
      * @param int $pageSize 为空则函数设定取出行数，不为空则设定取出行数及页数
-     * 
+     *
      * @return $this
      */
     public function limit($page, $pageSize = null)
@@ -850,10 +829,10 @@ class Pdomysql
 
     /**
      * 设置查询字段
-     * 
+     *
      * @param mixed $field 字段数组
      * @param bool  $raw   是否使用原字符串
-     * 
+     *
      * @return $this
      */
     public function select($field, $raw = false)
@@ -883,8 +862,8 @@ class Pdomysql
     /**
      * 设置Group参数
      *
-     * @param string $option 
-     * 
+     * @param string $option
+     *
      * @return $this
      */
     public function group($option = '')
@@ -902,7 +881,7 @@ class Pdomysql
 
     /**
      * 清理标记函数
-     * 
+     *
      * @return void
      */
     protected function clear()
@@ -920,7 +899,7 @@ class Pdomysql
 
     /**
      * 手动清理标记
-     * 
+     *
      * @return $this
      */
     public function clearKey()
@@ -931,7 +910,7 @@ class Pdomysql
 
     /**
      * 启动事务
-     * 
+     *
      * @return void
      */
     public function startTrans()
@@ -946,7 +925,7 @@ class Pdomysql
 
     /**
      * 用于非自动提交状态下面的查询提交
-     * 
+     *
      * @return boolean
      */
     public function commit()
@@ -961,7 +940,7 @@ class Pdomysql
 
     /**
      * 事务回滚
-     * 
+     *
      * @return boolean
      */
     public function rollback()
@@ -977,7 +956,7 @@ class Pdomysql
     /**
      * 关闭连接
      * PHP 在脚本结束时会自动关闭连接。
-     * 
+     *
      * @return void
      */
     public function close()
@@ -989,15 +968,15 @@ class Pdomysql
 
     /**
      * 检查连接是否正常，不正常重新连接
-     * 
+     *
      * @return void
      */
-    private function _checkconn()
+    private function checkconn()
     {
         try {
             $this->dbh->getAttribute(\PDO::ATTR_SERVER_INFO);
-        }catch(\PDOException $e) {
-            if (strpos($e->getMessage(),  'MySQL server has gone away') !== false) {
+        } catch (\PDOException $e) {
+            if (strpos($e->getMessage(), 'MySQL server has gone away') !== false) {
                 $this->close();
                 $this->connect();
             }
@@ -1016,9 +995,9 @@ class Pdomysql
 
     /**
      * 生成字段对应PDO标记
-     * 
+     *
      * @param string $k keys
-     * 
+     *
      * @return string
      */
     protected function getWhereTag($k)
@@ -1037,12 +1016,12 @@ class Pdomysql
     /**
      * 分割成一次多少条数据单独请求
      *
-     * @param string $tblName 
-     * @param array  $ary 
-     * @param int    $nums 
-     * 
+     * @param string $tblName
+     * @param array  $ary
+     * @param int    $nums
+     *
      * @return int
-     * 
+     *
      * @since 2018.12.24
      */
     public function splitBatchInsert($tblName = '', $ary = array(), $nums = 100)

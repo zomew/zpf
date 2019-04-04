@@ -20,34 +20,34 @@ class Mongodb
 {
     /**
      * MongoDB连接对象
-     * 
+     *
      * @var \MongoDB\Driver\Manager
      */
     public $manager;
     /**
      * 数据库名称
-     * 
+     *
      * @var string
      */
     private $_dbname;
     /**
      * 数据库连接字符串
-     * 
+     *
      * @var string
      */
     private $_config;
     /**
      * 最后断线检查时间
-     * 
+     *
      * @var int
      */
     private $_check_time = 0;
 
     /**
      * 连接MongoDB
-     * 
-     * @param string $conf 
-     * 
+     *
+     * @param string $conf
+     *
      * @return void
      */
     public function connectMongodb($conf = '')
@@ -58,7 +58,7 @@ class Mongodb
         if ($this->_config) {
             try {
                 $this->manager = new \MongoDB\Driver\Manager($this->_config);
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
             $this->_check_time = time();
@@ -69,13 +69,12 @@ class Mongodb
      * 初始化MongoDB类，配置参数可使用连接字符串或者数组
      *
      * Mongodb constructor.
-     * 
-     * @param string $conf 
+     *
+     * @param string $conf
      */
     public function __construct($conf = '')
     {
-        class_exists('\MongoDB\Driver\Manager') 
-            or die('MongoDB class is not exists.');
+        class_exists('\MongoDB\Driver\Manager') or die('MongoDB class is not exists.');
         $this->loadConfig();
         if (!$conf) {
             if (isset(\Config::$mongodb) && \Config::$mongodb) {
@@ -84,7 +83,7 @@ class Mongodb
         }
         if (is_array($conf)) {
             $conf = $this->buildDSN($conf);
-        } else if (is_string($conf)) {
+        } elseif (is_string($conf)) {
         } else {
             $conf = 'mongodb://localhost:27017/';
         }
@@ -95,9 +94,9 @@ class Mongodb
 
     /**
      * 组织集合名称
-     * 
-     * @param string $name 
-     * 
+     *
+     * @param string $name
+     *
      * @return string
      */
     public function getCollectionName($name = '')
@@ -138,8 +137,8 @@ class Mongodb
     /**
      * 将数组转换成连接字符串
      *
-     * @param array $conf 
-     * 
+     * @param array $conf
+     *
      * @return string
      */
     public function buildDSN($conf = array())
@@ -157,7 +156,7 @@ class Mongodb
                 if (isset($conf['port']) && $conf['port']) {
                     if (is_string($conf['port'])) {
                         $port = explode(',', $conf['port']);
-                    } else if (is_array($conf['port'])) {
+                    } elseif (is_array($conf['port'])) {
                         $port = $conf['port'];
                     }
                 }
@@ -166,7 +165,7 @@ class Mongodb
                 if (isset($conf['hostname']) && $conf['hostname']) {
                     if (is_string($conf['hostname'])) {
                         $host = explode(',', $conf['hostname']);
-                    } else if (is_array($conf['hostname'])) {
+                    } elseif (is_array($conf['hostname'])) {
                         $host = $conf['hostname'];
                     }
                 }
@@ -177,7 +176,7 @@ class Mongodb
                             if ($port) {
                                 if (count($port) == 1) {
                                     $p = $port[0];
-                                } else if (isset($port[$k])) {
+                                } elseif (isset($port[$k])) {
                                     $p = $port[$k];
                                 }
                             }
@@ -202,7 +201,7 @@ class Mongodb
             ) {
                 $ary['options'] = '?'.$conf['options'];
             }
-            $ret = \ZF\Common::SpecialReplace($ret, $ary);
+            $ret = \ZF\Common::specialReplace($ret, $ary);
         }
         return $ret;
     }
@@ -214,7 +213,8 @@ class Mongodb
      * @param array $options
      * @return bool|\MongoDB\Driver\WriteResult
      */
-    public function insert($collectionName = '', $data = array(), $options = array()) {
+    public function insert($collectionName = '', $data = array(), $options = array())
+    {
         $ret = false;
         if ($collectionName && $data) {
             $this->checkConnect();
@@ -222,7 +222,7 @@ class Mongodb
             $bulk->insert($data);
             try {
                 $ret = $this->manager->executeBulkWrite($this->getCollectionName($collectionName), $bulk, $options);
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -236,17 +236,18 @@ class Mongodb
      * @param array $options
      * @return bool|\MongoDB\Driver\WriteResult
      */
-    public function batchInsert($collectionName = '', $data = array(), $options = array()) {
+    public function batchInsert($collectionName = '', $data = array(), $options = array())
+    {
         $ret = false;
         if ($collectionName && $data) {
             $this->checkConnect();
             $bulk = new \MongoDB\Driver\BulkWrite();
-            foreach($data as $v) {
+            foreach ($data as $v) {
                 $bulk->insert($v);
             }
             try {
                 $ret = $this->manager->executeBulkWrite($this->getCollectionName($collectionName), $bulk, $options);
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -261,18 +262,22 @@ class Mongodb
      * @return array|bool
      * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function query($collectionName = '', $filter = array(), $options = array()) {
+    public function query($collectionName = '', $filter = array(), $options = array())
+    {
         $ret = false;
         if ($collectionName) {
             $this->checkConnect();
             $this->checkId($filter);
             try {
-                $r = $this->manager->executeQuery($this->getCollectionName($collectionName), new \MongoDB\Driver\Query($filter, $options));
+                $r = $this->manager->executeQuery(
+                    $this->getCollectionName($collectionName),
+                    new \MongoDB\Driver\Query($filter, $options)
+                );
                 $ret = array();
                 foreach ($r as $v) {
                     $ret[] = get_object_vars($v);
                 }
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -287,7 +292,8 @@ class Mongodb
      * @param array $options
      * @return bool|\MongoDB\Driver\WriteResult
      */
-    public function update($collectionName = '', $filter = array(), $data = array(), $options = array()) {
+    public function update($collectionName = '', $filter = array(), $data = array(), $options = array())
+    {
         $ret = false;
         if ($collectionName && $data && $filter) {
             $this->checkConnect();
@@ -296,7 +302,7 @@ class Mongodb
             $bulk->update($filter, $data, $options);
             try {
                 $ret = $this->manager->executeBulkWrite($this->getCollectionName($collectionName), $bulk);
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -310,7 +316,8 @@ class Mongodb
      * @param int $limit
      * @return bool|\MongoDB\Driver\WriteResult
      */
-    public function delete($collectionName = '', $filter = array(), $limit = 0) {
+    public function delete($collectionName = '', $filter = array(), $limit = 0)
+    {
         $ret = false;
         if ($collectionName && $filter) {
             $this->checkConnect();
@@ -319,7 +326,7 @@ class Mongodb
             $bulk->delete($filter, array('limit' => $limit));
             try {
                 $ret = $this->manager->executeBulkWrite($this->getCollectionName($collectionName), $bulk);
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -334,12 +341,13 @@ class Mongodb
      * @param int $limit
      * @return bool|\MongoDB\Driver\WriteResult
      */
-    public function batchDelete($collectionName = '', $filter = array(), $limit = 0) {
+    public function batchDelete($collectionName = '', $filter = array(), $limit = 0)
+    {
         $ret = false;
         if ($collectionName && $filter) {
             $this->checkConnect();
             $bulk = new \MongoDB\Driver\BulkWrite();
-            foreach($filter as $v) {
+            foreach ($filter as $v) {
                 if ($v && is_array($v)) {
                     $tmp = $v;
                     $this->checkId($tmp);
@@ -348,7 +356,7 @@ class Mongodb
             }
             try {
                 $ret = $this->manager->executeBulkWrite($this->getCollectionName($collectionName), $bulk);
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -363,7 +371,8 @@ class Mongodb
      * @return array|bool
      * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function aggregate($collectionName = '',$command = array(),$databaseName='') {
+    public function aggregate($collectionName = '', $command = array(), $databaseName = '')
+    {
         $ret = false;
         if ($collectionName && $command) {
             $this->checkConnect();
@@ -374,12 +383,16 @@ class Mongodb
             );
             if (isset($command['aggregate']) && isset($command['pipeline'])) {
                 $command = array_merge($raw, $command);
-            }else{
+            } else {
                 $raw['pipeline'] = $command;
                 $command = $raw;
             }
-            if ($collectionName) $command['aggregate'] = $collectionName;
-            if ($databaseName == '') $databaseName = $this->_dbname;
+            if ($collectionName) {
+                $command['aggregate'] = $collectionName;
+            }
+            if ($databaseName == '') {
+                $databaseName = $this->_dbname;
+            }
             $cmd = new \MongoDB\Driver\Command($command);
             try {
                 $r = $this->manager->executeReadCommand($databaseName, $cmd);
@@ -387,7 +400,7 @@ class Mongodb
                 foreach ($r as $v) {
                     $ret[] = get_object_vars($v);
                 }
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -398,7 +411,8 @@ class Mongodb
      * 检查是否断线，断线重连
      * @param bool $focus
      */
-    private function checkConnect($focus = false) {
+    private function checkConnect($focus = false)
+    {
         if ($focus || time() > $this->_check_time + 30) {
             $cmd = new \MongoDB\Driver\Command(array('ping' => 1));
             $ok = true;
@@ -418,14 +432,15 @@ class Mongodb
      * 处理字符串类型_id
      * @param $filter
      */
-    private function checkId(&$filter) {
+    private function checkId(&$filter)
+    {
         if (isset($filter['_id'])) {
             if ($filter['_id']) {
                 if (is_string($filter['_id'])) {
                     $filter['_id'] = new \MongoDB\BSON\ObjectId($filter['_id']);
                 }
             }
-            if (! $filter['_id'] instanceof \MongoDB\BSON\ObjectId){
+            if (! $filter['_id'] instanceof \MongoDB\BSON\ObjectId) {
                 unset($filter['_id']);
             }
         }
@@ -440,7 +455,8 @@ class Mongodb
      * @param string $databaseName
      * @return bool
      */
-    public function count($collectionName = '', $command = array(), $databaseName = '') {
+    public function count($collectionName = '', $command = array(), $databaseName = '')
+    {
         $ret = false;
         if ($collectionName && $command) {
             $this->checkConnect();
@@ -450,20 +466,26 @@ class Mongodb
             );
             if (isset($command['count']) && isset($command['query'])) {
                 $command = array_merge($raw, $command);
-            }else{
+            } else {
                 $raw['query'] = $command;
                 $command = $raw;
             }
-            if ($collectionName) $command['count'] = $collectionName;
-            if ($databaseName == '') $databaseName = $this->_dbname;
+            if ($collectionName) {
+                $command['count'] = $collectionName;
+            }
+            if ($databaseName == '') {
+                $databaseName = $this->_dbname;
+            }
             $cmd = new \MongoDB\Driver\Command($command);
             try {
                 $r = $this->manager->executeReadCommand($databaseName, $cmd);
                 if ($r) {
                     $tmp = $r->toArray()[0];
-                    if ($tmp && is_object($tmp) && property_exists($tmp, 'n')) $ret = $tmp->n;
+                    if ($tmp && is_object($tmp) && property_exists($tmp, 'n')) {
+                        $ret = $tmp->n;
+                    }
                 }
-            }catch (\MongoDB\Driver\Exception $e) {
+            } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
         }
@@ -480,7 +502,8 @@ class Mongodb
      * @param string $databaseName
      * @return array
      */
-    public function distinct($collectionName = '', $command = array(), $key = '', $databaseName = '') {
+    public function distinct($collectionName = '', $command = array(), $key = '', $databaseName = '')
+    {
         $ret = array();
         if ($collectionName && $command) {
             $this->checkConnect();
@@ -497,16 +520,24 @@ class Mongodb
                     $command = $raw;
                 }
             }
-            if (!isset($command[__FUNCTION__])) $command = array_merge(array(__FUNCTION__ => 'logs',), $command);
-            if ($collectionName) $command[__FUNCTION__] = $collectionName;
-            if ($databaseName == '') $databaseName = $this->_dbname;
+            if (!isset($command[__FUNCTION__])) {
+                $command = array_merge(array(__FUNCTION__ => 'logs',), $command);
+            }
+            if ($collectionName) {
+                $command[__FUNCTION__] = $collectionName;
+            }
+            if ($databaseName == '') {
+                $databaseName = $this->_dbname;
+            }
             if ($command['key']) {
                 $cmd = new \MongoDB\Driver\Command($command);
                 try {
                     $r = $this->manager->executeReadCommand($databaseName, $cmd);
                     if ($r) {
                         $tmp = $r->toArray();
-                        if (isset($tmp[0]) && is_object($tmp[0]) && property_exists($tmp[0], 'values')) $ret = $tmp[0]->values;
+                        if (isset($tmp[0]) && is_object($tmp[0]) && property_exists($tmp[0], 'values')) {
+                            $ret = $tmp[0]->values;
+                        }
                     }
                 } catch (\MongoDB\Driver\Exception $e) {
                     exit($e->__toString());

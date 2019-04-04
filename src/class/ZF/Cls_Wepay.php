@@ -20,28 +20,26 @@ class Wepay
 
     /**
      * 配置文件名称，可以提前修改
-     * 
      * @var string
      */
     public static $CONFIG = 'Wechat';
     /**
      * 支付相关配置
-     * 
      * @var string
      */
-    private static $_appid = '';
-    private static $_mchid = '';
-    private static $_paykey = '';
-    private static $_sslcert = '';
-    private static $_sslkey = '';
-    private static $_wid = '';
+    private static $appid = '';
+    private static $mchid = '';
+    private static $paykey = '';
+    private static $sslcert = '';
+    private static $sslkey = '';
+    private static $wid = '';
 
     /**
      * 检查签名是否正确，可以使用数组也可以使用XML
-     * 
-     * @param array|string $ary 
+     *
+     * @param array|string $ary
      * @param string       $key 支付key，填写错误将较验失败
-     * 
+     *
      * @return bool
      */
     public static function checkSign($ary = array(), $key = '')
@@ -52,7 +50,7 @@ class Wepay
         }
         if ($key == '') {
             self::init();
-            $key = self::$_paykey;
+            $key = self::$paykey;
         }
         if ($ary && is_array($ary)) {
             $type = 'MD5';
@@ -74,10 +72,10 @@ class Wepay
     /**
      * 生成签名值，含HMAC-SHA256算法
      *
-     * @param array  $params 
-     * @param string $key 
-     * @param string $type 
-     * 
+     * @param array  $params
+     * @param string $key
+     * @param string $type
+     *
      * @return string
      */
     public static function makeSign($params, $key = '', $type = 'MD5')
@@ -110,9 +108,9 @@ class Wepay
 
     /**
      * 将参数结连成字符串
-     * 
-     * @param array $params 
-     * 
+     *
+     * @param array $params
+     *
      * @return string
      */
     public static function toUrlParams($params)
@@ -132,8 +130,8 @@ class Wepay
     /**
      * XML转数组
      *
-     * @param string $xml 
-     * 
+     * @param string $xml
+     *
      * @return bool|mixed
      */
     public static function xml2array($xml)
@@ -144,9 +142,7 @@ class Wepay
 
         libxml_disable_entity_loader(true);
         $data = json_decode(
-            json_encode(
-                simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)
-            ), 
+            json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)),
             true
         );
         return $data;
@@ -154,16 +150,16 @@ class Wepay
 
     /**
      * 产生随机字符串，不长于32位
-     * 
-     * @param int $length 
-     * 
+     *
+     * @param int $length
+     *
      * @return string 产生的随机字符串
      */
     public static function getNonceStr($length = 32)
     {
         $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
         $str ="";
-        for ( $i = 0; $i < $length; $i++ ) {
+        for ($i = 0; $i < $length; $i++) {
             $str .= substr($chars, mt_rand(0, strlen($chars)-1), 1);
         }
         return $str;
@@ -172,20 +168,20 @@ class Wepay
     /**
      * 数组转换成XML
      *
-     * @param array $data  
-     * @param bool  $cdata 
-     * 
+     * @param array $data
+     * @param bool  $cdata
+     *
      * @return string
      * @since  2018.12.14
      */
-    private static function _array2xml($data, $cdata = true)
+    private static function array2xml($data, $cdata = true)
     {
         $xml = '';
         foreach ($data as $key => $val) {
             is_numeric($key) && $key = "item id=\"$key\"";
             $xml .= "<$key>";
-            $xml .= (is_array($val) || is_object($val)) ? 
-                self::_array2xml($val) : ($cdata ? self::_xmlSafeStr($val) : $val);
+            $xml .= (is_array($val) || is_object($val)) ? self::array2xml($val) :
+                ($cdata ? self::xmlSafeStr($val) : $val);
             list($key,) = explode(' ', $key);
             $xml .= "</$key>";
         }
@@ -195,12 +191,12 @@ class Wepay
     /**
      * 过滤XML不安全字符串
      *
-     * @param string $str 
-     * 
+     * @param string $str
+     *
      * @return string
      * @since  2018.12.14
      */
-    private static function _xmlSafeStr($str)
+    private static function xmlSafeStr($str)
     {
         return '<![CDATA[' .
             preg_replace("/[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]/", '', $str) .
@@ -209,31 +205,36 @@ class Wepay
 
     /**
      * XML编码
-     * 
+     *
      * @param mixed  $data     数据
      * @param string $root     根节点名
      * @param bool   $cdata    是否添加CDATA标签
      * @param string $attr     根节点属性
      * @param string $id       数字索引子节点key转换的属性名
      * @param string $encoding 数据编码
-     * 
+     *
      * @return string
      */
-    public static function xmlEncode($data, $root = 'xml', $cdata = true, 
-        $attr = '', $id = 'id', $encoding = 'utf-8'
+    public static function xmlEncode(
+        $data,
+        $root = 'xml',
+        $cdata = true,
+        $attr = '',
+        $id = 'id',
+        $encoding = 'utf-8'
     ) {
         if (is_array($attr)) {
-            $_attr = array();
+            $attr = array();
             foreach ($attr as $key => $value) {
-                $_attr[] = "{$key}=\"{$value}\"";
+                $attr[] = "{$key}=\"{$value}\"";
             }
-            $attr = implode(' ', $_attr);
+            $attr = implode(' ', $attr);
         }
         $attr = trim($attr);
         $attr = empty($attr) ? '' : " {$attr}";
         $xml = "<{$root}{$attr}>";
-        //$xml .= self::_array2xml($data, $item, $id);
-        $xml .= self::_array2xml($data, $cdata);
+        //$xml .= self::array2xml($data, $item, $id);
+        $xml .= self::array2xml($data, $cdata);
         $xml .= "</{$root}>";
         return $xml;
     }
@@ -242,22 +243,22 @@ class Wepay
     /**
      * 统一下单接口
      *
-     * @param array  $ary 
-     * @param string $openid 
-     * @param bool   $isTest 
-     * 
+     * @param array  $ary
+     * @param string $openid
+     * @param bool   $isTest
+     *
      * @return array
      * @throws \Exception
      * @since  2018.12.26
      */
-    public static function unifiedOrder($ary = array(),$openid = '',$isTest = false)
+    public static function unifiedOrder($ary = array(), $openid = '', $isTest = false)
     {
         self::init();
         $ret = array('code' => -1, 'msg' => '未知错误','data' => null,);
         if (!$openid) {
             return array('code' => 2, 'msg' => '跳转支付openid不正确',);
         }
-        $_paykey = self::$_paykey;
+        $paykey = self::$paykey;
         $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
         if ($isTest) {
             //沙盒测试时只能是1.01及1.02
@@ -265,12 +266,12 @@ class Wepay
             $url = self::getTestUrl($url);
             $signurl = 'https://api.mch.weixin.qq.com/sandboxnew/pay/getsignkey';
             $p = array(
-                'mch_id' => self::$_mchid,
+                'mch_id' => self::$mchid,
                 'nonce_str' => self::getNonceStr(),
             );
-            $p = self::makeSign($p, $_paykey);
+            $p = self::makeSign($p, $paykey);
             $x = self::xmlDecode(
-                self::_postXmlCurl(self::xmlEncodeSimple($p), $signurl)
+                self::postXmlCurl(self::xmlEncodeSimple($p), $signurl)
             );
 
             $msg = 'request='.$signurl.'?'.urldecode(http_build_query($p)).
@@ -278,7 +279,7 @@ class Wepay
             Common::_savelog('_unifiedorder.txt', $msg, false, true);
 
             if (isset($x['sandbox_signkey'])) {
-                $_paykey = $x['sandbox_signkey'];
+                $paykey = $x['sandbox_signkey'];
             }
         }
         $list = explode(',', 'body,detail,out_trade_no,total_fee,notify_url,openid');
@@ -307,10 +308,10 @@ class Wepay
                 $attach = $ary['attach'];
             }
             $param = array(
-                'appid' => self::$_appid,                       // 公众号appid
-                'mch_id' => self::$_mchid,                      // 微信支付商户id
+                'appid' => self::$appid,                       // 公众号appid
+                'mch_id' => self::$mchid,                      // 微信支付商户id
                 'nonce_str' => self::getNonceStr(),            // 随机字符串
-                'spbill_create_ip' => $_SERVER["REMOTE_ADDR"],  // 发起ip
+                'spbill_create_ip' => $SERVER["REMOTE_ADDR"],  // 发起ip
                 'body' => $ary['body'],                         // 商品名称
                 'detail' => $ary['detail'],                     // 商品描述
                 'out_trade_no' => $ary['out_trade_no'],         // 商户订单号
@@ -324,12 +325,12 @@ class Wepay
             // 签名算法
             ksort($param);
             $sign = strtoupper(
-                md5(urldecode(http_build_query($param)) . '&key=' . $_paykey)
+                md5(urldecode(http_build_query($param)) . '&key=' . $paykey)
             );
             $param['sign'] = $sign;
 
             $r = self::xmlDecode(
-                self::_postXmlCurl(self::xmlEncodeSimple($param), $url)
+                self::postXmlCurl(self::xmlEncodeSimple($param), $url)
             );
 
             $msg = 'request='.$url.'?'.urldecode(http_build_query($param)).
@@ -347,7 +348,7 @@ class Wepay
                 $rest['signType'] = 'MD5';
                 ksort($rest);
                 $sign = strtoupper(
-                    md5(urldecode(http_build_query($rest)).'&key='.$_paykey)
+                    md5(urldecode(http_build_query($rest)).'&key='.$paykey)
                 );
                 $rest['paySign'] = $sign;
 
@@ -360,8 +361,8 @@ class Wepay
     /**
      * 生成沙盒链接，用于测试
      *
-     * @param string $url 
-     * 
+     * @param string $url
+     *
      * @return string
      */
     public static function getTestUrl($url = '')
@@ -385,21 +386,21 @@ class Wepay
      * @param string $url     url
      * @param bool   $useCert 是否需要证书，默认不需要
      * @param int    $second  url执行超时时间，默认30s
-     * 
+     *
      * @throws \Exception
      * @return mixed
      */
-    private static function _postXmlCurl($xml, $url, $useCert = false, $second = 30)
+    private static function postXmlCurl($xml, $url, $useCert = false, $second = 30)
     {
         $ch = curl_init();
         //设置超时
         curl_setopt($ch, CURLOPT_TIMEOUT, $second);
 
-        curl_setopt($ch, CURLOPT_URL,  $url);
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);//严格校验
         //设置header
-        curl_setopt($ch,  CURLOPT_HEADER,  false);
+        curl_setopt($ch, CURLOPT_HEADER, false);
         //要求结果为字符串且输出到屏幕上
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -407,11 +408,11 @@ class Wepay
             self::init();
             //设置证书
             //使用证书：cert 与 key 分别属于两个.pem文件
-            if (self::$_sslcert && self::$_sslkey) {
+            if (self::$sslcert && self::$sslkey) {
                 curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'PEM');
-                curl_setopt($ch, CURLOPT_SSLCERT, self::$_sslcert);
+                curl_setopt($ch, CURLOPT_SSLCERT, self::$sslcert);
                 curl_setopt($ch, CURLOPT_SSLKEYTYPE, 'PEM');
-                curl_setopt($ch, CURLOPT_SSLKEY, self::$_sslkey);
+                curl_setopt($ch, CURLOPT_SSLKEY, self::$sslkey);
             } else {
                 throw new \Exception("未设置SSL证书，无法发起相应请求");
             }
@@ -424,10 +425,7 @@ class Wepay
         //返回结果
         if ($data) {
             curl_close($ch);
-            Common::_savelog(
-                '_postxml.txt', 
-                $url . "\r\n" . $xml . "\r\n\r\n" . $data . "\r\n\r\n"
-            );
+            Common::_savelog('_postxml.txt', $url . "\r\n" . $xml . "\r\n\r\n" . $data . "\r\n\r\n");
             return $data;
         } else {
             $error = curl_errno($ch);
@@ -438,15 +436,15 @@ class Wepay
 
     /**
      * 将数组转成XML
-     * 
-     * @param array $arr 
-     * 
+     *
+     * @param array $arr
+     *
      * @return string
      */
     public static function xmlEncodeSimple($arr)
     {
         $xml = "<xml>";
-        foreach ($arr as $key=>$val) {
+        foreach ($arr as $key => $val) {
             if (is_numeric($val)) {
                 $xml.="<".$key.">".$val."</".$key.">";
             } else {
@@ -460,8 +458,8 @@ class Wepay
     /**
      * 将XML转成数组
      *
-     * @param string $xml 
-     * 
+     * @param string $xml
+     *
      * @return mixed
      */
     public static function xmlDecode($xml)
@@ -480,19 +478,19 @@ class Wepay
     /**
      * 生成签名
      *
-     * @param array  $param 
-     * @param string $paykey 
-     * 
+     * @param array  $param
+     * @param string $paykey
+     *
      * @return array
      */
-    public static function sign($param = array(),$paykey = '')
+    public static function sign($param = array(), $paykey = '')
     {
         self::init();
         if (isset($param['sign'])) {
             unset($param['sign']);
         }
         if ($paykey == '') {
-            $paykey = self::$_paykey;
+            $paykey = self::$paykey;
         }
         ksort($param);
         $sign = strtoupper(
@@ -505,8 +503,8 @@ class Wepay
     /**
      * 获取config值
      *
-     * @param string $config 
-     * 
+     * @param string $config
+     *
      * @return string
      * @since  2018.12.25
      */
@@ -521,16 +519,16 @@ class Wepay
     /**
      * 初始化环境参数
      *
-     * @param string $config 
-     * @param bool   $focus 
-     * 
+     * @param string $config
+     * @param bool   $focus
+     *
      * @return array
      * @since  2018.12.26
      */
     public static function init($config = '', $focus = false)
     {
         $ret = array();
-        if ($focus || !self::$_appid || !self::$_mchid || !self::$_paykey) {
+        if ($focus || !self::$appid || !self::$mchid || !self::$paykey) {
             $conf = Common::LoadConfigData(self::getConfig($config), 'wepay');
             if ($conf) {
                 foreach ($conf as $k => $v) {

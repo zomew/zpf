@@ -24,7 +24,7 @@ class Twig extends ComposerBase
      *
      * @var array
      */
-    private $_options = array(
+    private $options = array(
         'templates_dir' => 'views',
         'cache' => 'cache',
         'auto_reload' => true,
@@ -49,7 +49,7 @@ class Twig extends ComposerBase
      *
      * @var bool
      */
-    private $_isConstract = false;
+    private $isConstract = false;
 
 
     /**
@@ -148,11 +148,11 @@ class Twig extends ComposerBase
     public function __construct($options = array())
     {
         parent::__construct('', $this->root, $this->dir);
-        $this->_cleanPublicProperty();
+        $this->cleanPublicProperty();
         if ($options && is_array($options)) {
-            $options = array_merge($this->_options, $options);
+            $options = array_merge($this->options, $options);
         } else {
-            $options = $this->_options;
+            $options = $this->options;
         }
         $this->loader = new \Twig\Loader\FilesystemLoader($options['templates_dir']);
         unset($options['templates_dir']);
@@ -165,9 +165,9 @@ class Twig extends ComposerBase
      * @return void
      * @since  2019.03.21
      */
-    private function _cleanPublicProperty()
+    private function cleanPublicProperty()
     {
-        if (!$this->_isConstract) {
+        if (!$this->isConstract) {
             try {
                 $ref = new \ReflectionClass($this);
                 foreach ($ref->getProperties(\ReflectionProperty::IS_PUBLIC) as $v) {
@@ -175,9 +175,9 @@ class Twig extends ComposerBase
                     $this->modules[] = $name;
                     unset($this->$name);
                 }
-            }catch(\ReflectionException $e) {
+            } catch (\ReflectionException $e) {
             }
-            $this->_isConstract = true;
+            $this->isConstract = true;
         }
     }
 }
