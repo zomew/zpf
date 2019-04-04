@@ -419,46 +419,46 @@ class BaseCode
         if (empty(self::$alphabet[$type][$mode])) {
             // generate the requested alphabet
             switch ($type) {
-            case self::RFC4648:
-                $alphabet = array_merge(
-                    range('A', 'Z'),
-                    ['2', '3', '4', '5', '6', '7']
-                );
-                self::$alphabet[$type][self::ENCODE] = $alphabet;
-                self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
-                break;
-            case self::RFC2938:
-                $alphabet = array_merge(
-                    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-                    range('A', 'V')
-                );
-                self::$alphabet[$type][self::ENCODE] = $alphabet;
-                self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
-                break;
-            case self::CROCKFORD:
-                $alphabet = array_merge(
-                    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-                    array_diff(
+                case self::RFC4648:
+                    $alphabet = array_merge(
                         range('A', 'Z'),
-                        ['I', 'L', 'O', 'U']
-                    )
-                );
-                self::$alphabet[$type][self::ENCODE] = $alphabet;
-                $decodeCrockford = array_merge(
-                    array_flip($alphabet),
-                    [
-                        'I' => 1,
-                        'L' => 1,
-                        'O' => 0
-                    ]
-                );
-                $lowercase = range('a', 'z');
-                unset($lowercase[20]);
-                foreach ($lowercase as $ch) {
-                    $decodeCrockford[$ch] = $decodeCrockford[strtoupper($ch)];
-                }
-                self::$alphabet[$type][self::DECODE] = $decodeCrockford;
-                break;
+                        ['2', '3', '4', '5', '6', '7']
+                    );
+                    self::$alphabet[$type][self::ENCODE] = $alphabet;
+                    self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
+                    break;
+                case self::RFC2938:
+                    $alphabet = array_merge(
+                        ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                        range('A', 'V')
+                    );
+                    self::$alphabet[$type][self::ENCODE] = $alphabet;
+                    self::$alphabet[$type][self::DECODE] = array_flip($alphabet);
+                    break;
+                case self::CROCKFORD:
+                    $alphabet = array_merge(
+                        ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                        array_diff(
+                            range('A', 'Z'),
+                            ['I', 'L', 'O', 'U']
+                        )
+                    );
+                    self::$alphabet[$type][self::ENCODE] = $alphabet;
+                    $decodeCrockford = array_merge(
+                        array_flip($alphabet),
+                        [
+                            'I' => 1,
+                            'L' => 1,
+                            'O' => 0
+                        ]
+                    );
+                    $lowercase = range('a', 'z');
+                    unset($lowercase[20]);
+                    foreach ($lowercase as $ch) {
+                        $decodeCrockford[$ch] = $decodeCrockford[strtoupper($ch)];
+                    }
+                    self::$alphabet[$type][self::DECODE] = $decodeCrockford;
+                    break;
             }
         }
         return self::$alphabet[$type][$mode];

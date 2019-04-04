@@ -95,12 +95,12 @@ class Wepay
         $string = $string . "&key=" . $key;
         //签名步骤三：MD5加密
         switch (strtoupper($type)) {
-        case 'HMAC-SHA256':
-            $string = hash_hmac("sha256", $string, $key);
-            break;
-        default:
-            $string = md5($string);
-            break;
+            case 'HMAC-SHA256':
+                $string = hash_hmac("sha256", $string, $key);
+                break;
+            default:
+                $string = md5($string);
+                break;
         }
         //签名步骤四：所有字符转为大写
         $result = strtoupper($string);

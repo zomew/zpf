@@ -494,15 +494,15 @@ class DataSafe
             if ($pub) {
                 $r = openssl_verify($data, base64_decode($sign), $pub, $type);
                 switch($r) {
-                case 1:
-                    $ret = true;
-                    break;
-                case 0:
-                    $ret = false;
-                    break;
-                default:
-                    echo openssl_error_string();
-                    break;
+                    case 1:
+                        $ret = true;
+                        break;
+                    case 0:
+                        $ret = false;
+                        break;
+                    default:
+                        echo openssl_error_string();
+                        break;
                 }
             }
         }

@@ -179,21 +179,21 @@ class Uploader
             }
 
             switch($type) {
-            case 'jpg':
-                $im = imagecreatefromjpeg($src);
-                break;
-            case 'gif':
-                $im = imagecreatefromgif($src);
-                break;
-            case 'png':
-                $im = imagecreatefrompng($src);
-                break;
-            case 'bmp':
-                $im = imagecreatefrombmp($src);
-                break;
-            default:
-                $im = null;
-                break;
+                case 'jpg':
+                    $im = imagecreatefromjpeg($src);
+                    break;
+                case 'gif':
+                    $im = imagecreatefromgif($src);
+                    break;
+                case 'png':
+                    $im = imagecreatefrompng($src);
+                    break;
+                case 'bmp':
+                    $im = imagecreatefrombmp($src);
+                    break;
+                default:
+                    $im = null;
+                    break;
             }
             if ($im) {
                 $w = imagesx($im);

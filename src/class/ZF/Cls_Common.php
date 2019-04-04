@@ -276,19 +276,19 @@ Class Common
                         $type = strtolower($exp[0]);
                         $var = $exp[count($exp)-1];
                         switch ($type) {
-                        case 'get':
-                            if (isset($_GET[$var])) {
-                                $ret[$v] = $_GET[$var];
-                            }
-                            break;
-                        case 'post':
-                            if (isset($_POST[$var])) {
-                                $ret[$v] = $_POST[$var];
-                            }
-                            break;
-                        default:
-                            $ret[$v] = self::input($var);
-                            break;
+                            case 'get':
+                                if (isset($_GET[$var])) {
+                                    $ret[$v] = $_GET[$var];
+                                }
+                                break;
+                            case 'post':
+                                if (isset($_POST[$var])) {
+                                    $ret[$v] = $_POST[$var];
+                                }
+                                break;
+                            default:
+                                $ret[$v] = self::input($var);
+                                break;
                         }
                     }
                     if (count($ary) == 1) {
@@ -568,12 +568,12 @@ Class Common
     {
         $ret = '';
         switch(true) {
-        case (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO']):
-            return $_SERVER['PATH_INFO'];
-            break;
-        case (isset($_SERVER['REQUEST_URI'])):
-            $ret = $_SERVER['REQUEST_URI'];
-            break;
+            case (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO']):
+                return $_SERVER['PATH_INFO'];
+                break;
+            case (isset($_SERVER['REQUEST_URI'])):
+                $ret = $_SERVER['REQUEST_URI'];
+                break;
         }
         if (preg_match('/^\/[\w\d\.]+(\/.*)$/i', $ret, $m)) {
             $ret = $m[1];
