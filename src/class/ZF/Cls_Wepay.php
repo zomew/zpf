@@ -311,7 +311,7 @@ class Wepay
                 'appid' => self::$appid,                       // 公众号appid
                 'mch_id' => self::$mchid,                      // 微信支付商户id
                 'nonce_str' => self::getNonceStr(),            // 随机字符串
-                'spbill_create_ip' => $SERVER["REMOTE_ADDR"],  // 发起ip
+                'spbill_create_ip' => $_SERVER["REMOTE_ADDR"],  // 发起ip
                 'body' => $ary['body'],                         // 商品名称
                 'detail' => $ary['detail'],                     // 商品描述
                 'out_trade_no' => $ary['out_trade_no'],         // 商户订单号
