@@ -59,6 +59,8 @@ class Pdomysql
     protected $clear = 0; //状态，0表示查询条件干净，1表示查询条件污染
     protected $trans = 0; //事务指令数
     protected $fieldList = array();    //字段列表缓存数据
+    protected $alias = [];
+    protected $join = '';
 
     /**
      * 初始化类
@@ -461,18 +463,27 @@ class Pdomysql
      * 查询函数
      *
      * @param string $tbName 操作的数据表名
+     * @param string $alias  别名
      *
      * @return array 结果集
      */
-    private function prvSelect($tbName = '')
+    private function prvSelect($tbName = '', $alias = '')
     {
         if ($this->clear > 0) {
             $this->clear();
         }
+        if ($tbName == '' && $alias == '' && $this->alias) {
+            $alias = array_pop($this->alias);
+        }
         $tbName = $this->getTablename($tbName);
-        $sql = "select " . trim($this->field) . " from `" . $tbName . "` " .
-            trim($this->where) . " " . trim($this->group) . " " .
-            trim($this->order) . " " . trim($this->limit);
+        if ($alias) {
+            $tbName = "`{$tbName}` as {$alias}";
+        } else {
+            $tbName = "`{$tbName}`";
+        }
+        $sql = "select " . trim($this->field) . " from " . $tbName . " " . trim($this->join) ." " . trim($this->where) .
+            " " . trim($this->group) . " " . trim($this->order) . " " . trim($this->limit);
+
         $this->clear = 1;
         return $this->doQuery(trim($sql));
     }
@@ -481,16 +492,21 @@ class Pdomysql
      * 用于执行前进行查看查询语句，主要用于调试
      *
      * @param string $tbName 表名
+     * @param string $alias  别名
      * @param bool   $clean  是否清除where数据
      *
      * @return mixed|string
      */
-    public function getSql($tbName = '', $clean = false)
+    public function getSql($tbName = '', $alias = '', $clean = false)
     {
         $tbName = $this->getTablename($tbName);
-        $sql = "select " . trim($this->field) . " from `" . $tbName . "` " .
-            trim($this->where) . " " . trim($this->group) . " " .
-            trim($this->order) . " " . trim($this->limit);
+        if ($alias) {
+            $tbName = "`{$tbName}` as {$alias}";
+        } else {
+            $tbName = "`{$tbName}`";
+        }
+        $sql = "select " . trim($this->field) . " from " . $tbName . " " . trim($this->join) ." " . trim($this->where) .
+            " " . trim($this->group) . " " . trim($this->order) . " " . trim($this->limit);
         foreach ($this->where_array as $k => $v) {
             $sql = str_replace(
                 ':' . $k . ' ',
@@ -508,24 +524,26 @@ class Pdomysql
      * 获取所有数组
      *
      * @param string $tbName
+     * @param string $alias
      *
      * @return array
      */
-    public function getAll($tbName = '')
+    public function getAll($tbName = '', $alias = '')
     {
-        return $this->prvSelect($tbName);
+        return $this->prvSelect($tbName, $alias);
     }
 
     /**
      * 获取单条记录
      *
      * @param string $tbName
+     * @param string $alias
      *
      * @return array
      */
-    public function getOne($tbName = '')
+    public function getOne($tbName = '', $alias = '')
     {
-        $rs = $this->limit('1')->prvSelect($tbName);
+        $rs = $this->limit('1')->prvSelect($tbName, $alias);
         $ret = array();
         if ($rs && isset($rs[0])) {
             $ret = $rs[0];
@@ -575,13 +593,17 @@ class Pdomysql
      * 添加From条件
      *
      * @param string $tbName
+     * @param string $alias
      *
      * @return $this
      */
-    public function from($tbName = '')
+    public function from($tbName = '', $alias = '')
     {
         if ($tbName) {
             $this->tbName = $this->getTablename($tbName);
+            if ($alias) {
+                array_push($this->alias, $alias);
+            }
         }
         return $this;
     }
@@ -892,6 +914,7 @@ class Pdomysql
         $this->tbName = '';
         $this->group = '';
         $this->field = '*';
+        $this->join = '';
         $this->clear = 0;
         $this->where_array = array();
         $this->where_key_count = array();
@@ -1044,5 +1067,47 @@ class Pdomysql
             }
         }
         return $ret;
+    }
+
+    /**
+     * join操作方法
+     * @param string $sql   结连查询SQL语句（可使用getSql获得）
+     * @param string $type  结连查询类型 inner/left/right/cross
+     * @param string $alias 别名
+     * @param string $on    结连查询条件
+     *
+     * @return $this
+     * @since  2019.04.07
+     */
+    public function join($sql = '', $type = 'inner', $alias = '', $on = '')
+    {
+        if (is_string($sql) && $sql) {
+            $type = trim(strtolower($type));
+            if (!in_array($type, ['inner', 'left', 'right', 'cross',])) {
+                trigger_error('Join type is incorrect', E_USER_ERROR);
+            }
+            if ($type != 'cross' && !$on) {
+                trigger_error('Join on conditions must be provided', E_USER_ERROR);
+            }
+            if ($alias) {
+                $aliasstr = "as {$alias}";
+            } else {
+                $aliasstr = '';
+            }
+            $onstr = '';
+            if ($on) {
+                if (is_string($on)) {
+                    $onstr = $on;
+                } elseif (is_array($on)) {
+                    $onarray = [];
+                    foreach ($on as $k => $v) {
+                        $onarray[] = "{$k} = {$v}";
+                    }
+                    $onstr = "on " . implode(' and ', $onarray);
+                }
+            }
+            $this->join = " {$type} join ({$sql}) {$aliasstr} {$onstr}";
+        }
+        return $this;
     }
 }
