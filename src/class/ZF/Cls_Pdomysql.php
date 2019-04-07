@@ -27,6 +27,7 @@ namespace ZF;
  * 12. 特殊运算方式被当成字段替换的问题处理/update赋值部分允许使用`xx`字段直接处理 2018.11.08
  * 13. 添加批量删除方法，内部条件为 and ，外部条件为 or 2018.12.05
  * 14. where in以及not in 操作，添加子查询功能 2019.04.03
+ * 15. 添加复杂条件查询方式，__logic  2019.04.07
  */
 
 class Pdomysql
@@ -497,7 +498,7 @@ class Pdomysql
      *
      * @return mixed|string
      */
-    public function getSql($tbName = '', $alias = '', $clean = false)
+    public function getSql($tbName = '', $alias = '', $clean = true)
     {
         $tbName = $this->getTablename($tbName);
         if ($alias) {
@@ -726,73 +727,16 @@ class Pdomysql
                 $this->where = ' where (';
                 $this->where_key_count = array();
                 $this->where_array = array();
+                $append = false;
             } else {
+                $append = true;
                 if ($option) {
                     $this->where .= "{$outlogic}(";
                 }
             }
 
-            if (is_string($option)) {
-                $this->where .= $option;
-            } elseif (is_array($option)) {
-                foreach ($option as $k => $v) {
-                    if (is_array($v)) {
-                        if (is_array($v[0])) {
-                            $condition = '(';
-                            $submark = 0;
-                            foreach ($v as $n) {
-                                $r = (isset($n[1]) && trim($n[1])) ? $n[1] : '=';
-                                $l = isset($n[2]) ? ' ' . trim($n[2]) . ' ' : $logic;
-                                if (preg_match('/`.*`/i', $n[0])) {
-                                    $condition .= $l . ' ' . $this->addChar($k) .
-                                        ' ' . $r . ' ' . $n[0] . ' ';
-                                } else {
-                                    $tag = $this->getWhereTag($k);
-                                    $this->where_array[$tag] = $n[0];
-                                    if ($submark == 0) {
-                                        $l = '';
-                                        $submark = 1;
-                                    }
-                                    $condition .= $l . ' ' . $this->addChar($k) .
-                                        ' ' . $r . ' :' . $tag . ' ';
-                                }
-                            }
-                            $condition .= ')';
-                        } else {
-                            $relative = (isset($v[1]) && trim($v[1])) ? $v[1] : '=';
-                            $logic = isset($v[2]) ? ' ' . trim($v[2]) . ' ' : $logic;
-                            if (preg_match('/`.*`/i', $v[0])) {
-                                $condition = '(' . $this->addChar($k) . ' ' .
-                                    $relative . ' ' . $v[0] . ')';
-                            } else {
-                                $tag = $this->getWhereTag($k);
-                                $this->where_array[$tag] = $v[0];
-                                $condition = '(' . $this->addChar($k) . ' ' . $relative . ' :' . $tag . ' )';
-                            }
-                        }
-                    } else {
-                        //$logic = 'and';
-                        if (preg_match('/`.*`/i', $v)) {
-                            $condition = '(' . $this->addChar($k) . '=' . $v . ')';
-                        } else {
-                            if (false !== strpos($k, '(')
-                                || false !== strpos($k, '.')
-                                || false !== strpos($k, '`')
-                            ) {
-                                $condition = '(' . $this->addChar($k) . '=\'' .
-                                    $v . '\')';
-                            } else {
-                                $tag = $this->getWhereTag($k);
-                                $this->where_array[$tag] = $v;
-                                $condition = '(' . $this->addChar($k) . '=:' .
-                                    $tag . ' )';
-                            }
-                        }
-                    }
-                    $this->where .= isset($mark) ? $logic . $condition : $condition;
-                    $mark = 1;
-                }
-            }
+            $this->where .= $this->whereStr($option, $logic, $outlogic, $append);
+
             $this->where .= ')';
         }
         return $this;
@@ -1109,5 +1053,117 @@ class Pdomysql
             $this->join = " {$type} join ({$sql}) {$aliasstr} {$onstr}";
         }
         return $this;
+    }
+
+    /**
+     * 生成where条件字符串
+     * @param        $option
+     * @param string $logic
+     * @param string $outlogic
+     * @param bool   $append
+     *
+     * @return string
+     * @since  2019.04.07
+     */
+    protected function whereStr($option, $logic = 'and', $outlogic = 'and', $append = false)
+    {
+        $ret = '';
+        if ($option) {
+            if ($outlogic) {
+                $outlogic = ' ' . trim($outlogic) . ' ';
+            } else {
+                $outlogic = ' and ';
+            }
+            $logic = ' ' . trim($logic) . ' ';
+
+            if (is_string($option)) {
+                $ret = $option;
+            } elseif (is_array($option)) {
+                if (isset($option['__logic']) && $option['__logic']) {
+                    $outlogic = ' ' . trim($option['__logic']) . ' ';
+                    unset($option['__logic']);
+
+                    $tmp = [];
+                    foreach ($option as $k => $v) {
+                        if (is_numeric($k)) {
+                            $tmp[] = $this->whereStr($v, $logic);
+                        } else {
+                            $tmp[] = $this->whereStr([$k => $v,]);
+                        }
+                    }
+                    $ret = '( ' . implode($outlogic, $tmp) . ' )';
+                } else {
+                    $ret = '( ' . $this->singleWhereStr($option, $logic) . ' )';
+                }
+            }
+            $ret = ($append ? $outlogic : '') . $ret;
+        }
+        return $ret;
+    }
+
+    /**
+     * 原正常where方式字符串
+     * @param        $option
+     * @param string $logic
+     *
+     * @return string
+     * @since  2019.04.07
+     */
+    protected function singleWhereStr($option, $logic = ' and ')
+    {
+        $ret = '';
+        if ($option && is_array($option)) {
+            foreach ($option as $k => $v) {
+                if (is_array($v)) {
+                    if (is_array($v[0])) {
+                        $condition = '(';
+                        $submark = 0;
+                        foreach ($v as $n) {
+                            $r = (isset($n[1]) && trim($n[1])) ? $n[1] : '=';
+                            $l = isset($n[2]) ? ' ' . trim($n[2]) . ' ' : $logic;
+                            if (preg_match('/`.*`/i', $n[0])) {
+                                $condition .= $l . ' ' . $this->addChar($k) . ' ' . $r . ' ' . $n[0] . ' ';
+                            } else {
+                                $tag = $this->getWhereTag($k);
+                                $this->where_array[$tag] = $n[0];
+                                if ($submark == 0) {
+                                    $l = '';
+                                    $submark = 1;
+                                }
+                                $condition .= $l . ' ' . $this->addChar($k) . ' ' . $r . ' :' . $tag . ' ';
+                            }
+                        }
+                        $condition .= ')';
+                    } else {
+                        $relative = (isset($v[1]) && trim($v[1])) ? $v[1] : '=';
+                        $logic = isset($v[2]) ? ' ' . trim($v[2]) . ' ' : $logic;
+                        if (preg_match('/`.*`/i', $v[0])) {
+                            $condition = '(' . $this->addChar($k) . ' ' . $relative . ' ' . $v[0] . ')';
+                        } else {
+                            $tag = $this->getWhereTag($k);
+                            //$condition = '(' . $this->_addChar($k) . ' ' . $relative . ' ' . $v[0] . ')';
+                            $this->where_array[$tag] = $v[0];
+                            $condition = '(' . $this->addChar($k) . ' ' . $relative . ' :' . $tag . ' )';
+                        }
+                    }
+                } else {
+                    if (preg_match('/`.*`/i', $v)) {
+                        $condition = '(' . $this->addChar($k) . '=' . $v . ')';
+                    } else {
+                        if (false !== strpos($k, '(') || false !== strpos($k, '.') || false !== strpos($k, '`')) {
+                            $condition = '(' . $this->addChar($k) . '=\'' . $v . '\')';
+                        } else {
+                            $tag = $this->getWhereTag($k);
+                            //$condition = '(' . $this->_addChar($k) . '=' . $v . ')';
+                            $this->where_array[$tag] = $v;
+                            $condition = '(' . $this->addChar($k) . '=:' . $tag . ' )';
+                        }
+                    }
+                }
+                $ret .= isset($mark) ? $logic . $condition : $condition;
+                $mark = 1;
+            }
+        }
+        return $ret;
     }
 }
