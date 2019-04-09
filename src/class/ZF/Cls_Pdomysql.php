@@ -735,7 +735,7 @@ class Pdomysql
                 }
             }
 
-            $this->where .= $this->whereStr($option, $logic, $outlogic, $append);
+            $this->where .= $this->whereStr($option, $logic);
 
             $this->where .= ')';
         }
@@ -1059,21 +1059,14 @@ class Pdomysql
      * 生成where条件字符串
      * @param        $option
      * @param string $logic
-     * @param string $outlogic
-     * @param bool   $append
      *
      * @return string
      * @since  2019.04.07
      */
-    protected function whereStr($option, $logic = 'and', $outlogic = 'and', $append = false)
+    protected function whereStr($option, $logic = 'and')
     {
         $ret = '';
         if ($option) {
-            if ($outlogic) {
-                $outlogic = ' ' . trim($outlogic) . ' ';
-            } else {
-                $outlogic = ' and ';
-            }
             $logic = ' ' . trim($logic) . ' ';
 
             if (is_string($option)) {
@@ -1096,7 +1089,6 @@ class Pdomysql
                     $ret = '( ' . $this->singleWhereStr($option, $logic) . ' )';
                 }
             }
-            $ret = ($append ? $outlogic : '') . $ret;
         }
         return $ret;
     }
