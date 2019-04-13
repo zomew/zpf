@@ -87,6 +87,7 @@ class Common
      * 发送GET请求
      *
      * @param string $url URL地址
+     * @param array  $header
      * @param array  $ssl SSL参数
      *
      * @return string
@@ -94,7 +95,7 @@ class Common
      *
      * @since 2019.03.23
      */
-    public static function getRequest($url, $ssl = array())
+    public static function getRequest($url, $header = [], $ssl = [])
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -102,6 +103,9 @@ class Common
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_HEADER, false);
+        if ($header) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_AUTOREFERER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -140,13 +144,14 @@ class Common
      *
      * @param string $url  链接
      * @param mixed  $post 数据
+     * @param array  $header
      * @param array  $ssl  SSL证书，用于双向认证
      *
      * @return mixed|string
      * @static
      * @since  2019.03.23
      */
-    public static function postRequest($url, $post, $ssl = array())
+    public static function postRequest($url, $post, $header = [], $ssl = array())
     {
         $headers = array(
             //'Content-Type' => 'application/x-www-form-urlencoded',
@@ -158,6 +163,9 @@ class Common
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_HEADER, false);
+        if ($header) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_AUTOREFERER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -184,7 +192,6 @@ class Common
             $post = (is_array($post)) ? http_build_query($post) : $post;
             curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         }
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $res = curl_exec($ch);
         $info = curl_getinfo($ch);
         curl_close($ch);
@@ -193,7 +200,6 @@ class Common
             '_post_return.txt',
             $url."\r\n".var_export($post, true)."\r\n\r\n".$res."\r\n\r\n"
         );
-        //file_put_contents('_post_return.txt',$res);
         if ($info['http_code']!=200) {
             $res = '';
         }
