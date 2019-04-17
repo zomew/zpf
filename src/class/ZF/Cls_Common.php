@@ -123,7 +123,7 @@ class Common
                     $value = $v;
                 }
                 if ($value) {
-                    curl_setopt($ch, $key, $value);
+                    curl_setopt($ch, constant($key), $value);
                 }
             }
         }
@@ -183,7 +183,7 @@ class Common
                     $value = $v;
                 }
                 if ($value) {
-                    curl_setopt($ch, $key, $value);
+                    curl_setopt($ch, constant($key), $value);
                 }
             }
         }
