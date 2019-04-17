@@ -122,7 +122,7 @@ class Common
                 } elseif (trim($v)) {
                     $value = $v;
                 }
-                if ($value) {
+                if ($value && defined($key)) {
                     curl_setopt($ch, constant($key), $value);
                 }
             }
@@ -182,7 +182,7 @@ class Common
                 } elseif (trim($v)) {
                     $value = $v;
                 }
-                if ($value) {
+                if ($value && defined($key)) {
                     curl_setopt($ch, constant($key), $value);
                 }
             }
