@@ -11,7 +11,9 @@
 if (!defined("ZF_ROOT")) {
     define("ZF_ROOT", dirname(__FILE__) . DIRECTORY_SEPARATOR);
 }
-
+if (PHP_MAJOR_VERSION < 7) {
+    throw new \Exception('Please try to upgrade your PHP version to more than 7.0');
+}
 if (defined('STDIN')) {
     chdir(dirname(__FILE__));
 }
@@ -42,7 +44,7 @@ function autoload($cls)
     $libs = array();
     if (file_exists(ZF_ROOT . 'static_libs.php')) {
         $libs = include ZF_ROOT . 'static_libs.php';
-    } else if (file_exists(ZF_ROOT . 'static_libs.example.php')) {
+    } elseif (file_exists(ZF_ROOT . 'static_libs.example.php')) {
         $libs = include ZF_ROOT . 'static_libs.example.php';
     }
     $name = trim(strtolower($cls), ' \\');
