@@ -12,7 +12,7 @@ if (!defined("ZF_ROOT")) {
     define("ZF_ROOT", dirname(__FILE__) . DIRECTORY_SEPARATOR);
 }
 if (PHP_MAJOR_VERSION < 7) {
-    throw new \Exception('Please try to upgrade your PHP version to more than 7.0');
+    trigger_error('Please try to upgrade your PHP version to more than 7.0', E_USER_WARNING);
 }
 if (defined('STDIN')) {
     chdir(dirname(__FILE__));
