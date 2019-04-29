@@ -29,19 +29,19 @@ class Mongodb
      *
      * @var string
      */
-    private $_dbname;
+    private $dbname;
     /**
      * 数据库连接字符串
      *
      * @var string
      */
-    private $_config;
+    private $config;
     /**
      * 最后断线检查时间
      *
      * @var int
      */
-    private $_check_time = 0;
+    private $checktime = 0;
 
     /**
      * 连接MongoDB
@@ -53,15 +53,15 @@ class Mongodb
     public function connectMongodb($conf = '')
     {
         if ($conf && is_string($conf)) {
-            $this->_config = $conf;
+            $this->config = $conf;
         }
-        if ($this->_config) {
+        if ($this->config) {
             try {
-                $this->manager = new \MongoDB\Driver\Manager($this->_config);
+                $this->manager = new \MongoDB\Driver\Manager($this->config);
             } catch (\MongoDB\Driver\Exception $e) {
                 exit($e->__toString());
             }
-            $this->_check_time = time();
+            $this->checktime = time();
         }
     }
 
@@ -103,8 +103,8 @@ class Mongodb
     {
         $ret = $name;
         if ($name && is_string($name)) {
-            if (!preg_match('/^\s*' . $this->_dbname . '\..*$/i', $name)) {
-                $ret = $this->_dbname. '.' . $name;
+            if (!preg_match('/^\s*' . $this->dbname . '\..*$/i', $name)) {
+                $ret = $this->dbname. '.' . $name;
             }
         }
         return $ret;
@@ -122,8 +122,8 @@ class Mongodb
             $uname = php_uname('n');
             $config = array(
                 ZF_ROOT . "config.{$uname}.php",
-                ZF_ROOT.'config.php',
-                ZF_ROOT.'config.example.php',
+                ZF_ROOT . 'config.php',
+                ZF_ROOT . 'config.example.php',
             );
             foreach ($config as $v) {
                 if (file_exists($v)) {
@@ -194,14 +194,14 @@ class Mongodb
             }
             if (isset($conf['database']) && $conf['database']) {
                 $ary['database'] = $conf['database'];
-                $this->_dbname = $conf['database'];
+                $this->dbname = $conf['database'];
             }
             if (isset($conf['options']) && $conf['options']
                 && is_string($conf['options'])
             ) {
                 $ary['options'] = '?'.$conf['options'];
             }
-            $ret = \ZF\Common::specialReplace($ret, $ary);
+            $ret = Common::specialReplace($ret, $ary);
         }
         return $ret;
     }
@@ -209,9 +209,11 @@ class Mongodb
     /**
      * 插入单个文档
      * @param string $collectionName
-     * @param array $data
-     * @param array $options
+     * @param array  $data
+     * @param array  $options
+     *
      * @return bool|\MongoDB\Driver\WriteResult
+     * @throws \MongoDB\Driver\Exception\Exception
      */
     public function insert($collectionName = '', $data = array(), $options = array())
     {
@@ -232,9 +234,11 @@ class Mongodb
     /**
      * 插入多个文档，数据为二维数组
      * @param string $collectionName
-     * @param array $data
-     * @param array $options
+     * @param array  $data
+     * @param array  $options
+     *
      * @return bool|\MongoDB\Driver\WriteResult
+     * @throws \MongoDB\Driver\Exception\Exception
      */
     public function batchInsert($collectionName = '', $data = array(), $options = array())
     {
@@ -287,10 +291,12 @@ class Mongodb
     /**
      * 更新数据
      * @param string $collectionName
-     * @param array $filter
-     * @param array $data
-     * @param array $options
+     * @param array  $filter
+     * @param array  $data
+     * @param array  $options
+     *
      * @return bool|\MongoDB\Driver\WriteResult
+     * @throws \MongoDB\Driver\Exception\Exception
      */
     public function update($collectionName = '', $filter = array(), $data = array(), $options = array())
     {
@@ -312,9 +318,11 @@ class Mongodb
     /**
      * 删除记录
      * @param string $collectionName
-     * @param array $filter
-     * @param int $limit
+     * @param array  $filter
+     * @param int    $limit
+     *
      * @return bool|\MongoDB\Driver\WriteResult
+     * @throws \MongoDB\Driver\Exception\Exception
      */
     public function delete($collectionName = '', $filter = array(), $limit = 0)
     {
@@ -335,11 +343,12 @@ class Mongodb
 
     /**
      * 批量删除
-     *
      * @param string $collectionName
-     * @param array $filter
-     * @param int $limit
+     * @param array  $filter
+     * @param int    $limit
+     *
      * @return bool|\MongoDB\Driver\WriteResult
+     * @throws \MongoDB\Driver\Exception\Exception
      */
     public function batchDelete($collectionName = '', $filter = array(), $limit = 0)
     {
@@ -391,7 +400,7 @@ class Mongodb
                 $command['aggregate'] = $collectionName;
             }
             if ($databaseName == '') {
-                $databaseName = $this->_dbname;
+                $databaseName = $this->dbname;
             }
             $cmd = new \MongoDB\Driver\Command($command);
             try {
@@ -410,15 +419,18 @@ class Mongodb
     /**
      * 检查是否断线，断线重连
      * @param bool $focus
+     *
+     * @return void
+     * @throws \MongoDB\Driver\Exception\Exception
      */
     private function checkConnect($focus = false)
     {
-        if ($focus || time() > $this->_check_time + 30) {
+        if ($focus || time() > $this->checktime + 30) {
             $cmd = new \MongoDB\Driver\Command(array('ping' => 1));
             $ok = true;
             try {
-                $this->manager->executeReadCommand($this->_dbname, $cmd);
-                $this->_check_time = time();
+                $this->manager->executeReadCommand($this->dbname, $cmd);
+                $this->checktime = time();
             } catch (\MongoDB\Driver\Exception $e) {
                 $ok = false;
             }
@@ -448,12 +460,13 @@ class Mongodb
 
     /**
      * 统计筛选记录条数（相对于查询交互数据更少，效率更高，用于不需要数据集的情况）
-     * @since 2019.02.20
-     *
      * @param string $collectionName
-     * @param array $command
+     * @param array  $command
      * @param string $databaseName
+     *
      * @return bool
+     * @throws \MongoDB\Driver\Exception\Exception
+     * @since  2019.02.20
      */
     public function count($collectionName = '', $command = array(), $databaseName = '')
     {
@@ -474,7 +487,7 @@ class Mongodb
                 $command['count'] = $collectionName;
             }
             if ($databaseName == '') {
-                $databaseName = $this->_dbname;
+                $databaseName = $this->dbname;
             }
             $cmd = new \MongoDB\Driver\Command($command);
             try {
@@ -494,13 +507,14 @@ class Mongodb
 
     /**
      * MongoDB原生去重，不能排序，需要排序建议使用aggregate
-     * @since 2019.02.20
-     *
      * @param string $collectionName
-     * @param array $command
+     * @param array  $command
      * @param string $key
      * @param string $databaseName
+     *
      * @return array
+     * @throws \MongoDB\Driver\Exception\Exception
+     * @since  2019.02.20
      */
     public function distinct($collectionName = '', $command = array(), $key = '', $databaseName = '')
     {
@@ -527,7 +541,7 @@ class Mongodb
                 $command[__FUNCTION__] = $collectionName;
             }
             if ($databaseName == '') {
-                $databaseName = $this->_dbname;
+                $databaseName = $this->dbname;
             }
             if ($command['key']) {
                 $cmd = new \MongoDB\Driver\Command($command);

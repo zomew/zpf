@@ -137,7 +137,7 @@ class TimeLog
             $a = $t - self::$start;
             self::$timelog[] = self::getCallInfo() . "\t" . $p . '   ' .
                 $t . "  \ntotal:". $a ;
-            \ZF\Common::_savelog(self::$file, "".implode("\n", self::$timelog));
+            Common::_savelog(self::$file, "".implode("\n", self::$timelog));
             self::$start = 0;
             self::$last = 0;
             self::$timelog = array();

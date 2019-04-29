@@ -217,7 +217,10 @@ class DySDK
                 $security
             );
             if ($content) {
-                Common::_savelog("sms_".date('Ymd').".txt", "ip={$ip},req=".json_encode(\ZF\Common::input()).",resp=" . $content);
+                Common::_savelog(
+                    "sms_".date('Ymd').".txt",
+                    "ip={$ip},req=".json_encode(Common::input()).",resp=" . $content
+                );
                 $tmp = @json_decode($content, true);
                 if ($tmp && isset($tmp['Code']) && $tmp['Code'] == 'OK') {
                     $ret = array('code' => 0, 'msg' => 'success',);

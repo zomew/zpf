@@ -9,6 +9,9 @@
 
 namespace ZF;
 
+use \Twig\Loader\FilesystemLoader;
+use \Twig\Environment;
+
 /**
  * Twig简易封装实体类，可直接用子属性调用对应的实体类
  *
@@ -154,9 +157,9 @@ class Twig extends ComposerBase
         } else {
             $options = $this->options;
         }
-        $this->loader = new \Twig\Loader\FilesystemLoader($options['templates_dir']);
+        $this->loader = new FilesystemLoader($options['templates_dir']);
         unset($options['templates_dir']);
-        $this->Environment = new \Twig\Environment($this->loader, $options);
+        $this->Environment = new Environment($this->loader, $options);
     }
 
     /**

@@ -33,21 +33,21 @@ class Entity
     /**
      * Mysql连接对象
      *
-     * @var \ZF\Pdomysql
+     * @var Pdomysql
      */
     public $db;
 
     /**
      * Redis连接对象
      *
-     * @var \ZF\Redislock
+     * @var Redislock
      */
     public $rl;
 
     /**
      * MongoDb连接对象
      *
-     * @var \ZF\Mongodb
+     * @var Mongodb
      */
     public $md;
 
