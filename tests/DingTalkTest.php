@@ -51,6 +51,12 @@ class DingTalkTest extends PHPUnit\Framework\TestCase
         $this->assertNotEmpty(DingTalk::getAccessToken());
     }
 
+    /**
+     * 用户信息实体类测试
+     *
+     * @return void
+     * @since  2019.05.16
+     */
     public function testUserInfo()
     {
         $source = <<<EOT
