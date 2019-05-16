@@ -289,4 +289,35 @@ class User extends \ZF\DingTalk
         }
         return ['code' => $code, 'msg' => $msg,];
     }
+
+    /**
+     * 删除用户
+     * @param $userid
+     *
+     * @return array
+     * @static
+     * @since  2019.05.16
+     */
+    public static function delete($userid)
+    {
+        $code = -1;
+        $msg = '';
+        if ($userid && is_string($userid)) {
+            $url = self::buildOperateUrl('user/delete', ['access_token' => '', 'userid' => $userid,]);
+            $info = self::doRequest($url, [], 'GET', '', true);
+            if (isset($info['errcode']) && isset($info['errmsg'])) {
+                if ($info['errcode'] == 0) {
+                    $code = 0;
+                    $msg = 'success';
+                } else {
+                    $code = $info['errcode'];
+                    $msg = $info['errmsg'];
+                }
+            } else {
+                $code = 2;
+                $msg = '数据请求失败';
+            }
+        }
+        return ['code' => $code, 'msg' => $msg,];
+    }
 }
