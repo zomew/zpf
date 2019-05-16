@@ -140,5 +140,49 @@ namespace {
                 'port'     => '',
             ),
         );
+
+        /**
+         * @var array 阿里钉钉相关配置项
+         */
+        public static $DINGTALK_CONFIG = array(
+            'db' => array(
+                'hostname' => '127.0.0.1',
+                'username' => 'username',
+                'password' => 'password',
+                'database' => 'dbname',
+                'port'     => 3306,
+                'prefix'   => 'zf_',
+                'pconnect' => false,
+                'charset'  => 'utf8',
+            ),
+            'redis' => array(
+                'host' => '127.0.0.1',
+                'port' => 6379,
+                'pass' => '',
+                'db' => 0,
+            ),
+            'mongodb' => array(
+                'hostname' => '127.0.0.1',
+                'username' => 'username',
+                'password' => 'password',
+                'database' => 'dbname',
+                'port'     => '',
+            ),
+            //阿里钉钉应用配置
+            'dingtalk' => [
+                //'OAPI_HOST' => 'https://oapi.dingtalk.com',
+                //应用AgentID
+                'AGENTID' => '',
+                'APP_KEY'   => '',
+                'APP_SECRET'=> '',
+                //应用管理后台登录参数： https://open-doc.dingtalk.com/microapp/serverapi2/xswxhg
+                'CORP_ID' => '',
+                'CORP_SECRET' => '',
+                //移动登录参数： https://open-doc.dingtalk.com/microapp/serverapi2/kymkv6
+                'APPID' => '',
+                'APPSECRET' => '',
+                'Redis_Cache' => false,
+            ],
+        );
     }
 }
