@@ -483,7 +483,7 @@ class DingTalk extends Entity
                     $json = @json_decode(Common::postRequest($url, $data), true);
                 }
                 if (is_array($json) && isset($json['errcode'])) {
-                    if ($raw) {
+                    if ($raw || $keys == '') {
                         $ret = $json;
                     } else {
                         if ($json['errcode'] == 0 && isset($json[$keys])) {

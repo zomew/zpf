@@ -291,4 +291,15 @@ class UserInfo
         }
         return $ret;
     }
+
+    /**
+     * 获取用户数据数组
+     *
+     * @return mixed
+     * @since  2019.05.16
+     */
+    public function getArray()
+    {
+        return json_decode($this->__toString(), true);
+    }
 }

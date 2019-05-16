@@ -10,6 +10,7 @@
 namespace ZF\DingTalk;
 
 use \ZF\Common;
+use \ZF\DingTalk\UserInfo;
 
 /**
  * 阿里钉钉用户操作相关API
@@ -191,5 +192,101 @@ class User extends \ZF\DingTalk
             $ret = self::doRequest($url, [], 'GET', 'userid', $raw);
         }
         return $ret;
+    }
+
+    /**
+     * 创建用户，成功返回userid，错误返回原始错误消息数组
+     * @param mixed $data 允许为UserInfo对象或JSON串或者数组
+     *
+     * @return array
+     * @static
+     * @since  2019.05.16
+     */
+    public static function create($data)
+    {
+        $code = -1;
+        $msg = '';
+        $info = '';
+        if ($data instanceof UserInfo) {
+            $data = $data->getArray();
+        } elseif (is_string($data)) {
+            $data = json_decode($data, true);
+        } elseif (!is_array($data)) {
+            $data = [];
+        }
+        if ($data) {
+            //必填项
+            $chklist = ['name', 'department', 'mobile',];
+            $need = [];
+            foreach ($chklist as $v) {
+                if (!isset($data[$v])) {
+                    $need[] = $v;
+                }
+            }
+            if ($need) {
+                $code = 1;
+                $msg = implode(',', $need) . '字段必须设置，请检查参数';
+            } else {
+                $url = self::buildOperateUrl('user/create', ['access_token' => '',]);
+                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', 'userid');
+                if (is_string($info)) {
+                    $code = 0;
+                    $msg = 'success';
+                } elseif (is_array($info)) {
+                    if (isset($info['errcode']) && isset($info['errmsg'])) {
+                        $code = $info['errcode'];
+                        $msg = $info['errmsg'];
+                    }
+                }
+            }
+        }
+        $ret = ['code' => $code, 'msg' => $msg,];
+        if ($info) {
+            $ret['data'] = $info;
+        }
+        return $ret;
+    }
+
+    /**
+     * 更新用户数据
+     * @param mixed $data 允许为UserInfo对象或JSON串或者数组
+     *
+     * @return array
+     * @static
+     * @since  2019.05.16
+     */
+    public static function update($data)
+    {
+        $code = -1;
+        $msg = '';
+        if ($data instanceof UserInfo) {
+            $data = $data->getUpdateData();
+        } elseif (is_string($data)) {
+            $data = json_decode($data, true);
+        } elseif (!is_array($data)) {
+            $data = [];
+        }
+        if ($data) {
+            if (count($data) > 1 && isset($data['userid']) && is_string($data['userid']) && $data['userid']) {
+                $url = self::buildOperateUrl('user/update', ['access_token' => '',]);
+                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', '', true);
+                if (isset($info['errcode']) && isset($info['errmsg'])) {
+                    if ($info['errcode'] == 0) {
+                        $code = 0;
+                        $msg = 'success';
+                    } else {
+                        $code = $info['errcode'];
+                        $msg = $info['errmsg'];
+                    }
+                } else {
+                    $code = 2;
+                    $msg = '数据请求失败';
+                }
+            } else {
+                $code = 1;
+                $msg = '没有需要更新的字段或者缺少更新用户标识';
+            }
+        }
+        return ['code' => $code, 'msg' => $msg,];
     }
 }
