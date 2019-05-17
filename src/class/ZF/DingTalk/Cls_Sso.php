@@ -9,8 +9,14 @@
 
 namespace ZF\DingTalk;
 
-use \ZF\Common;
-
+/**
+ * Class Sso
+ *
+ * @package ZF\DingTalk
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2019.05.15
+ */
 class Sso extends \ZF\DingTalk
 {
     /**
@@ -36,12 +42,9 @@ class Sso extends \ZF\DingTalk
         }
         $params = ['corpid' => $config['CORP_ID'], 'corpsecret' => $config['CORP_SECRET'],];
         $url = self::buildOperateUrl('sso/gettoken', $params);
-        if ($json = @json_decode(Common::getRequest($url), true)) {
-            if (is_array($json) && isset($json['errcode'])) {
-                if ($json['errcode'] == 0 && isset($json['access_token'])) {
-                    $ret = $json['access_token'];
-                }
-            }
+        $json = self::doRequest($url, [], 'GET', 'access_token');
+        if (is_string($json)) {
+            $ret = $json;
         }
         return $ret;
     }
@@ -62,17 +65,7 @@ class Sso extends \ZF\DingTalk
         $ret = [];
         if ($code) {
             $url = self::buildOperateUrl('sso/getuserinfo', ['access_token' => self::getSsoToken(), 'code' => $code,]);
-            if ($json = @json_decode(Common::getRequest($url), true)) {
-                if ($raw) {
-                    $ret = $json;
-                } else {
-                    if (is_array($json) && isset($json['errcode'])) {
-                        if ($json['errcode'] == 0 && isset($json['user_info'])) {
-                            $ret = $json['user_info'];
-                        }
-                    }
-                }
-            }
+            $ret = self::doRequest($url, [], 'GET', 'user_info', $raw);
         }
         return $ret;
     }

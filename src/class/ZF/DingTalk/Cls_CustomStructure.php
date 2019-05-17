@@ -30,6 +30,16 @@ abstract class CustomStructure
     protected $updateField = [];
 
     /**
+     * @var array 需要将数组转换成连接串的字段
+     */
+    protected $splitStrField = [];
+
+    /**
+     * @var string 数组转换成连接字符串的字符
+     */
+    protected $splitStr = '|';
+
+    /**
      * @var bool 是否已实例化
      */
     protected $isConstruct = false;
@@ -55,10 +65,12 @@ abstract class CustomStructure
                 if (strpos($name, 'p_') === 0) {
                     $outname = str_replace('p_', '', $name);
                     $value = $this->self->$name;
-                    if ($value || is_bool($value)) {
+                    if ($value) {
                         if (is_array($value)) {
                             if (in_array($outname, $this->self->jsonStrField)) {
                                 $ret[$outname] = json_encode($value, JSON_UNESCAPED_UNICODE);
+                            } elseif (in_array($outname, $this->self->splitStrField)) {
+                                $ret[$outname] = implode($this->self->splitStr, $value);
                             } else {
                                 $ret[$outname] = $value;
                             }
@@ -73,6 +85,8 @@ abstract class CustomStructure
                     if (!isset($ret[$k])) {
                         if (is_array($v) && in_array($k, $this->self->jsonStrField)) {
                             $ret[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
+                        } elseif (is_array($v) && in_array($k, $this->self->splitStrField)) {
+                            $ret[$k] = implode($this->self->splitStr, $v);
                         } else {
                             $ret[$k] = $v;
                         }
@@ -101,6 +115,8 @@ abstract class CustomStructure
                     if (is_string($v) && $v) {
                         if (in_array($k, $this->jsonStrField)) {
                             $this->$name = @json_decode($v, true);
+                        } elseif (in_array($k, $this->splitStrField)) {
+                            $this->$name = explode($this->splitStr, $v);
                         } else {
                             $this->$name = $v;
                         }
@@ -182,6 +198,9 @@ abstract class CustomStructure
         if (isset($this->self->$real) && $this->self->$real == $value) {
             $update = false;
         }
+        if (is_string($this->self->$real)) {
+            $value = strval($value);
+        }
         if ($update) {
             $this->self->updateField[$name] = $value;
             if (isset($this->self->$real)) {
@@ -203,6 +222,8 @@ abstract class CustomStructure
             foreach ($this->self->updateField as $k => $v) {
                 if (in_array($k, $this->self->jsonStrField)) {
                     $ret[$k] = json_encode($v);
+                } elseif (in_array($k, $this->self->splitStrField)) {
+                    $ret[$k] = implode($this->self->splitStr, $v);
                 } else {
                     $ret[$k] = $v;
                 }

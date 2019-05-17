@@ -9,7 +9,10 @@
 require_once __DIR__ . '/../src/__INIT.php';
 
 use \ZF\DingTalk;
-use \ZF\DingTalk\UserInfo;
+use \ZF\DingTalk\{
+    UserInfo,
+    DepartmentInfo,
+};
 
 class DingTalkTest extends PHPUnit\Framework\TestCase
 {
@@ -63,7 +66,7 @@ class DingTalkTest extends PHPUnit\Framework\TestCase
 {"userid":"jamers","name":"测试","orderInDepts":"{\"1\":10,\"2\":20}","department":[1,2],"mobile":"13000000000","isHide":false,"isSenior":false,"extattr":"{\"\\u7231\\u597d\":\"\\u65c5\\u6e38\",\"\\u6d4b\\u8bd5\":\"Test\"}"}
 EOT;
         $actual = <<<EOT
-{"userid":"jamers","name":"测试用户","orderInDepts":"{\"1\":10,\"2\":20}","department":[1,2],"mobile":"13000000000","isHide":false,"isSenior":false,"extattr":"{\"爱好\":\"旅游\",\"测试\":\"Test\"}","custom":{"0":"自定义1","1":"自定义2","6":"测试"}}
+{"userid":"jamers","name":"测试用户","orderInDepts":"{\"1\":10,\"2\":20}","department":[1,2],"mobile":"13000000000","extattr":"{\"爱好\":\"旅游\",\"测试\":\"Test\"}","custom":{"0":"自定义1","1":"自定义2","6":"测试"}}
 EOT;
         $update = ['userid' => 'jamers', 'name' => '测试用户', 'custom' => ['自定义1', '自定义2', 6 => '测试',],];
         $mobile = '13000000000';
@@ -79,5 +82,31 @@ EOT;
         $this->assertEquals($user->getUpdateData(), $update);
         $data = json_decode($source, true);
         $this->assertEquals(new UserInfo($data), new UserInfo($source));
+    }
+
+    /**
+     * 部门信息实体类测试
+     *
+     * @return void
+     * @since  2019.05.17
+     */
+    public function testDeparmmentInfo()
+    {
+        $source = '{"parentid":"1","name":"测试部门","deptPermits":"2|3|4","outerPermitUsers":"demo|test"}';
+        $actual = '{"parentid":"1","name":"测试","deptPermits":"2|3|4","outerPermitUsers":"demo|test|333","custom":{"0":"自定义1","1":"自定义2","6":"测试"}}';
+        $custom = ['自定义1', '自定义2', 6 => '测试',];
+        $name = '测试';
+        $update = ['name' => $name, 'outerPermitUsers' => 'demo|test|333', 'custom' => $custom,];
+        $dept = new DepartmentInfo($source);
+        $dept->name = $name;
+        $dept->parentid = 1;
+        $dept->deptPermits = [2,3,4,];
+        $dept->outerPermitUsers = ['demo', 'test', '333',];
+        $dept->custom = $custom;
+        $this->assertEquals($dept->name, $name);
+        $this->assertEquals($dept->__toString(), $actual);
+        $this->assertEquals($dept->getUpdateData(), $update);
+        $data = json_decode($source, true);
+        $this->assertEquals(new DepartmentInfo($data), new DepartmentInfo($source));
     }
 }

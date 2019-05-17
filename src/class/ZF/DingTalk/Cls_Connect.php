@@ -9,8 +9,6 @@
 
 namespace ZF\DingTalk;
 
-use \ZF\Common;
-
 /**
  * 第三方钉钉登录相关封装
  *

@@ -181,7 +181,10 @@ namespace {
                 //移动登录参数： https://open-doc.dingtalk.com/microapp/serverapi2/kymkv6
                 'APPID' => '',
                 'APPSECRET' => '',
+                //AccessToken是否使用Redis缓存
                 'Redis_Cache' => false,
+                //是否统一采用钉钉原始请求（使用$raw参数的接口会被影响）
+                'FORCE_GET_RAW_DATA' => false,
             ],
         );
     }

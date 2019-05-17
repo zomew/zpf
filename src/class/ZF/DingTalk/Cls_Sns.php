@@ -9,8 +9,14 @@
 
 namespace ZF\DingTalk;
 
-use \ZF\Common;
-
+/**
+ * SNS登录相关封装
+ *
+ * @package ZF\DingTalk
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2019.05.16
+ */
 class Sns extends \ZF\DingTalk
 {
     /**
@@ -38,18 +44,7 @@ class Sns extends \ZF\DingTalk
         $params = ['accessKey' => $appid, 'timestamp' => time(),];
         $params['signature'] = self::signature($params['timestamp'], $appsecret);
         $url = self::buildOperateUrl('sns/getuserinfo_bycode', $params);
-        $ret = [];
-        if ($json = @json_decode(Common::postRequest($url, $data))) {
-            if ($raw) {
-                $ret = $json;
-            } else {
-                if (isset($json['errcode']) && $json['errcode'] == 0 && isset($json['user_info'])) {
-                    $ret = $json['user_info'];
-                } else {
-                    $ret = $json;
-                }
-            }
-        }
+        $ret = self::doRequest($url, $data, 'POST', 'user_info');
         return $ret;
     }
 }

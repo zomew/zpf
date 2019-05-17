@@ -372,6 +372,8 @@ class DingTalk extends Entity
                 } else {
                     $params_ary[] = "{$key}={$v}";
                 }
+            } elseif (is_bool($v)) {
+                $params_ary[] = "{$key}=" . strval($v);
             }
         }
         return self::$OAPI_HOST . $opt . '?' . implode('&', $params_ary);
@@ -466,12 +468,16 @@ class DingTalk extends Entity
      * @static
      * @since  2019.05.16
      */
-    protected static function doRequest(string $url, $data = [], $type = '', $keys = '', $raw = false)
+    public static function doRequest(string $url, $data = [], $type = '', $keys = '', &$raw = false)
     {
         $ret = [];
         if ($url) {
             if ($type == '') {
                 $type = 'GET';
+            }
+            $config = self::getConfig();
+            if (isset($config['FORCE_GET_RAW_DATA']) && $config['FORCE_GET_RAW_DATA']) {
+                $raw = true;
             }
             $type = trim(strtoupper($type));
             if (in_array($type, ['POST', 'GET',])) {
@@ -557,5 +563,39 @@ class DingTalk extends Entity
             }
         }
         return $params;
+    }
+
+    /**
+     * 返回数据处理过程
+     * @param array $ret
+     * @param array $data
+     * @param bool  $raw
+     *
+     * @return array
+     * @static
+     * @since  2019.05.17
+     */
+    protected static function outAry(array $ret, $data = [], $raw = false)
+    {
+        if (!$raw && !isset($data['errcode'])) {
+            $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
+        } else {
+            if ($raw) {
+                $ret = $data;
+            } else {
+                if (isset($data['errcode'])) {
+                    $ret['code'] = $data['errcode'];
+                    if ($data['errcode'] == 0) {
+                        $ret['msg'] = 'success';
+                        unset($data['errcode'], $data['errmsg']);
+                        $ret['data'] = $data;
+                    }
+                }
+                if (isset($data['errmsg'])) {
+                    $ret['msg'] = $data['errmsg'];
+                }
+            }
+        }
+        return $ret;
     }
 }

@@ -56,6 +56,9 @@ class User extends \ZF\DingTalk
     {
         $ret = [];
         if ($userid) {
+            if ($lang == '') {
+                $lang = 'zh_CN';
+            }
             $url = self::buildOperateUrl('user/get', ['access_token' => '', 'userid' => $userid, 'lang' => $lang,]);
             $ret = @json_decode(Common::getRequest($url), true);
         }
@@ -95,12 +98,17 @@ class User extends \ZF\DingTalk
      */
     public static function getSimpleList($department_id, array $options = [], bool $raw = false)
     {
-        $ret = [];
+        $ret = ['code' => -1, 'msg' => '',];
         if ($department_id) {
             $params = ['access_token' => '', 'department_id' => $department_id,];
             $params = self::buildOptionsArray($params, $options);
             $url = self::buildOperateUrl('user/simplelist', $params);
-            $ret = self::doRequest($url, [], 'GET', 'userlist', $raw);
+            $data = self::doRequest($url, [], 'GET', 'userlist', $raw);
+            if (!$raw && !isset($data['errcode'])) {
+                $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
+            } else {
+                $ret = $data;
+            }
         }
         return $ret;
     }
@@ -125,14 +133,19 @@ class User extends \ZF\DingTalk
         array $options = [],
         bool $raw = false
     ) {
-        $ret = [];
+        $ret = ['code' => -1, 'msg' => '',];
         if ($department_id) {
             $options['offset'] = $offset;
             $options['size'] = $size;
             $params = ['access_token' => '', 'department_id' => $department_id,];
             $params = self::buildOptionsArray($params, $options);
             $url = self::buildOperateUrl('user/listbypage', $params);
-            $ret = self::doRequest($url, [], 'GET', 'userlist', $raw);
+            $data = self::doRequest($url, [], 'GET', 'userlist', $raw);
+            if (!$raw && !isset($data['errcode'])) {
+                $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
+            } else {
+                $ret = $data;
+            }
         }
         return $ret;
     }
@@ -164,11 +177,16 @@ class User extends \ZF\DingTalk
      */
     public static function getAdminScope($userid, $raw = false)
     {
-        $ret = [];
+        $ret = ['code' => -1, 'msg' => '',];
         if ($userid) {
             $params = ['access_token' => '', 'userid' => $userid,];
             $url = self::buildOperateUrl('topapi/user/get_admin_scope', $params);
-            $ret = self::doRequest($url, [], 'GET', 'dept_ids', $raw);
+            $data = self::doRequest($url, [], 'GET', 'dept_ids', $raw);
+            if (!$raw && !isset($data['errcode'])) {
+                $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
+            } else {
+                $ret = $data;
+            }
         }
         return $ret;
     }
@@ -178,18 +196,21 @@ class User extends \ZF\DingTalk
      * @param      $unionid
      * @param bool $raw
      *
-     * @return array|mixed
+     * @return string|mixed
      * @static
      * @since  2019.05.16
      * @see https://open-doc.dingtalk.com/microapp/serverapi2/ege851
      */
     public static function getUseridByUnionid($unionid, $raw = false)
     {
-        $ret = [];
+        $ret = '';
         if ($unionid) {
             $params = ['access_token' => '', 'unionid' => $unionid,];
             $url = self::buildOperateUrl('user/getUseridByUnionid', $params);
             $ret = self::doRequest($url, [], 'GET', 'userid', $raw);
+            if (is_array($ret)) {
+                $ret = '';
+            }
         }
         return $ret;
     }
@@ -269,7 +290,7 @@ class User extends \ZF\DingTalk
         if ($data) {
             if (count($data) > 1 && isset($data['userid']) && is_string($data['userid']) && $data['userid']) {
                 $url = self::buildOperateUrl('user/update', ['access_token' => '',]);
-                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', '', true);
+                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', '');
                 if (isset($info['errcode']) && isset($info['errmsg'])) {
                     if ($info['errcode'] == 0) {
                         $code = 0;
@@ -298,13 +319,13 @@ class User extends \ZF\DingTalk
      * @static
      * @since  2019.05.16
      */
-    public static function delete($userid)
+    public static function delete(string $userid)
     {
         $code = -1;
         $msg = '';
         if ($userid && is_string($userid)) {
             $url = self::buildOperateUrl('user/delete', ['access_token' => '', 'userid' => $userid,]);
-            $info = self::doRequest($url, [], 'GET', '', true);
+            $info = self::doRequest($url, [], 'GET', '');
             if (isset($info['errcode']) && isset($info['errmsg'])) {
                 if ($info['errcode'] == 0) {
                     $code = 0;

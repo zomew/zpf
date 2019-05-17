@@ -11,6 +11,14 @@ namespace ZF\DingTalk;
 
 use \ZF\Common;
 
+/**
+ * 消息发送接口封装
+ *
+ * @package ZF\DingTalk
+ * @author  Jamers <jamersnox@zomew.net>
+ * @license https://opensource.org/licenses/GPL-3.0 GPL
+ * @since   2019.05.17
+ */
 class Message extends \ZF\DingTalk
 {
     /**
