@@ -575,7 +575,7 @@ class DingTalk extends Entity
      * @static
      * @since  2019.05.17
      */
-    protected static function outAry(array $ret, $data = [], $raw = false)
+    public static function outAry(array $ret, $data = [], $raw = false)
     {
         if (!$raw && !isset($data['errcode'])) {
             $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
