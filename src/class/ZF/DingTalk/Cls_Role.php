@@ -9,8 +9,6 @@
 
 namespace ZF\DingTalk;
 
-use \ZF\Common;
-
 /**
  * 阿里钉钉角色管理模块封装
  *
@@ -112,7 +110,7 @@ class Role extends \ZF\DingTalk
         if ($role_id > 0) {
             $data = ['roleId' => $role_id,];
             $url = self::buildOperateUrl('topapi/role/getrole', ['access_token' => '',]);
-            $data = self::doRequest($url, $data, 'POST', 'role_group', $raw);
+            $data = self::doRequest($url, $data, 'POST', 'role', $raw);
             $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
@@ -122,12 +120,13 @@ class Role extends \ZF\DingTalk
      * 添加角色
      * @param string $roleName
      * @param int    $groupId
+     * @param bool   $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function addRole($roleName = '', $groupId = 0)
+    public static function addRole($roleName = '', $groupId = 0, $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
         if ($roleName && $groupId > 0) {
@@ -143,12 +142,13 @@ class Role extends \ZF\DingTalk
      * 更新角色数据
      * @param string $roleName
      * @param int    $roleId
+     * @param bool   $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function updateRole($roleName = '', $roleId = 0)
+    public static function updateRole($roleName = '', $roleId = 0, $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
         if ($roleName && $roleId > 0) {
@@ -162,13 +162,14 @@ class Role extends \ZF\DingTalk
 
     /**
      * 删除角色
-     * @param int $roleId
+     * @param int  $roleId
+     * @param bool $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function deleteRole($roleId = 0)
+    public static function deleteRole($roleId = 0, $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
         if ($roleId > 0) {
@@ -183,12 +184,13 @@ class Role extends \ZF\DingTalk
     /**
      * 添加角色组
      * @param string $name
+     * @param bool   $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function addRoleGroup($name = '')
+    public static function addRoleGroup($name = '', $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
         if ($name) {
@@ -204,12 +206,13 @@ class Role extends \ZF\DingTalk
      * 批量增加员工角色
      * @param array $roleIds
      * @param array $userIds
+     * @param bool  $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function addRolesForeMps($roleIds = [], $userIds = [])
+    public static function addRolesForeMps($roleIds = [], $userIds = [], $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
         if ($roleIds && $userIds) {
@@ -225,12 +228,13 @@ class Role extends \ZF\DingTalk
      * 批量删除员工角色
      * @param array $roleIds
      * @param array $userIds
+     * @param bool  $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function delRolesForeMps($roleIds = [], $userIds = [])
+    public static function delRolesForeMps($roleIds = [], $userIds = [], $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
         if ($roleIds && $userIds) {

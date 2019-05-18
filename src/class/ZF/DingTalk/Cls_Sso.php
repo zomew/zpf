@@ -65,7 +65,8 @@ class Sso extends \ZF\DingTalk
         $ret = [];
         if ($code) {
             $url = self::buildOperateUrl('sso/getuserinfo', ['access_token' => self::getSsoToken(), 'code' => $code,]);
-            $ret = self::doRequest($url, [], 'GET', 'user_info', $raw);
+            $data = self::doRequest($url, [], 'GET', 'user_info', $raw);
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }

@@ -93,52 +93,17 @@ class ExtContactInfo extends CustomStructure
     protected $p_mobile = '';
 
     /**
+     * @var array 更新数组必须有的字段
+     */
+    protected $updateNeedField = ['user_id' => 'userid', 'label_ids', 'follower_user_id', 'name',];
+
+    /**
      * 扩展实体化函数，用于处理特殊的数据结构
      * @param string $data
      */
     public function __construct($data = '')
     {
-        if (is_string($data)) {
-            $data = json_decode($data, true);
-        }
-        if (is_array($data)) {
-            if (isset($data['contact'])) {
-                $data = $data['contact'];
-            }
-        } else {
-            $data = '';
-        }
         parent::__construct($data);
-    }
-
-    /**
-     * 魔术方法转字符串，由于此组件数据参数不一致，需要单独处理
-     *
-     * @return false|string
-     * @since  2019.05.18
-     */
-    public function __toString()
-    {
-        $ret = json_decode(parent::magicToString(), true);
-        return json_encode(['contact' => $ret,], JSON_UNESCAPED_UNICODE);
-    }
-
-    /**
-     * 获取更新数据数组，由于不一致需要特殊处理
-     *
-     * @return array
-     * @since  2019.05.18
-     */
-    public function getUpdateData()
-    {
-        $ret = [];
-        if ($this->updateField) {
-            if ($this->p_userid) {
-                $ret['userid'] = $this->p_userid;
-            }
-            $ret = array_merge($ret, parent::getUpdateData());
-        }
-        return ['contact' => $ret,];
     }
 
     /**
@@ -157,5 +122,33 @@ class ExtContactInfo extends CustomStructure
             return;
         }
         $this->magicSet($name, $value);
+    }
+
+    /**
+     * 获取更新数据
+     *
+     * @return array
+     * @since  2019.05.18
+     */
+    public function getUpdateData()
+    {
+        $ret = [];
+        if ($this->updateField) {
+            if ($this->updateNeedField) {
+                foreach ($this->updateNeedField as $k => $v) {
+                    if (is_numeric($k)) {
+                        if (is_string($v) && $v && ($this->$v || gettype($this->$v) == 'boolean')) {
+                            $ret[$v] = $this->$v;
+                        }
+                    } elseif (is_string($k)) {
+                        if (is_string($v) && $v && ($this->$v || gettype($this->$v) == 'boolean')) {
+                            $ret[$k] = $this->$v;
+                        }
+                    }
+                }
+            }
+            $ret = array_merge($ret, parent::getUpdateData());
+        }
+        return $ret;
     }
 }

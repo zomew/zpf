@@ -44,7 +44,8 @@ class Sns extends \ZF\DingTalk
         $params = ['accessKey' => $appid, 'timestamp' => time(),];
         $params['signature'] = self::signature($params['timestamp'], $appsecret);
         $url = self::buildOperateUrl('sns/getuserinfo_bycode', $params);
-        $ret = self::doRequest($url, $data, 'POST', 'user_info');
+        $data = self::doRequest($url, $data, 'POST', 'user_info', $raw);
+        $ret = self::outAry([], $data, $raw);
         return $ret;
     }
 }

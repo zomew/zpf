@@ -37,7 +37,8 @@ class User extends \ZF\DingTalk
         $ret = '';
         if ($code) {
             $url = self::buildOperateUrl('user/getuserinfo', ['access_token' => '', 'code' => $code,]);
-            $ret = self::doRequest($url, [], 'GET', 'userid', $raw);
+            $data = self::doRequest($url, [], 'GET', 'userid', $raw);
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }
@@ -80,7 +81,8 @@ class User extends \ZF\DingTalk
         $ret = [];
         if ($deptId) {
             $url = self::buildOperateUrl('user/getDeptMember', ['access_token' => '', 'deptId' => $deptId,]);
-            $ret = self::doRequest($url, [], 'GET', 'userIds', $raw);
+            $data = self::doRequest($url, [], 'GET', 'userIds', $raw);
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }
@@ -104,11 +106,7 @@ class User extends \ZF\DingTalk
             $params = self::buildOptionsArray($params, $options);
             $url = self::buildOperateUrl('user/simplelist', $params);
             $data = self::doRequest($url, [], 'GET', 'userlist', $raw);
-            if (!$raw && !isset($data['errcode'])) {
-                $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
-            } else {
-                $ret = $data;
-            }
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }
@@ -141,11 +139,7 @@ class User extends \ZF\DingTalk
             $params = self::buildOptionsArray($params, $options);
             $url = self::buildOperateUrl('user/listbypage', $params);
             $data = self::doRequest($url, [], 'GET', 'userlist', $raw);
-            if (!$raw && !isset($data['errcode'])) {
-                $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
-            } else {
-                $ret = $data;
-            }
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }
@@ -162,7 +156,8 @@ class User extends \ZF\DingTalk
     public static function getAdminList($raw = false)
     {
         $url = self::buildOperateUrl('user/get_admin', ['access_token' => '',]);
-        $ret = self::doRequest($url, [], 'GET', 'admin_list', $raw);
+        $data = self::doRequest($url, [], 'GET', 'admin_list', $raw);
+        $ret = self::outAry([], $data, $raw);
         return $ret;
     }
 
@@ -182,11 +177,7 @@ class User extends \ZF\DingTalk
             $params = ['access_token' => '', 'userid' => $userid,];
             $url = self::buildOperateUrl('topapi/user/get_admin_scope', $params);
             $data = self::doRequest($url, [], 'GET', 'dept_ids', $raw);
-            if (!$raw && !isset($data['errcode'])) {
-                $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
-            } else {
-                $ret = $data;
-            }
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }
@@ -207,10 +198,8 @@ class User extends \ZF\DingTalk
         if ($unionid) {
             $params = ['access_token' => '', 'unionid' => $unionid,];
             $url = self::buildOperateUrl('user/getUseridByUnionid', $params);
-            $ret = self::doRequest($url, [], 'GET', 'userid', $raw);
-            if (is_array($ret)) {
-                $ret = '';
-            }
+            $data = self::doRequest($url, [], 'GET', 'userid', $raw);
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }
@@ -218,16 +207,15 @@ class User extends \ZF\DingTalk
     /**
      * 创建用户，成功返回userid，错误返回原始错误消息数组
      * @param mixed $data 允许为UserInfo对象或JSON串或者数组
+     * @param bool  $raw
      *
      * @return array
      * @static
      * @since  2019.05.16
      */
-    public static function create($data)
+    public static function create($data, $raw = false)
     {
-        $code = -1;
-        $msg = '';
-        $info = '';
+        $ret = ['code' => -1, 'msg' => '',];
         if ($data instanceof UserInfo) {
             $data = $data->getArray();
         } elseif (is_string($data)) {
@@ -245,25 +233,13 @@ class User extends \ZF\DingTalk
                 }
             }
             if ($need) {
-                $code = 1;
                 $msg = implode(',', $need) . '字段必须设置，请检查参数';
+                $ret = ['code' => 1, 'msg' => $msg,];
             } else {
                 $url = self::buildOperateUrl('user/create', ['access_token' => '',]);
-                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', 'userid');
-                if (is_string($info)) {
-                    $code = 0;
-                    $msg = 'success';
-                } elseif (is_array($info)) {
-                    if (isset($info['errcode']) && isset($info['errmsg'])) {
-                        $code = $info['errcode'];
-                        $msg = $info['errmsg'];
-                    }
-                }
+                $data = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', 'userid', $raw);
+                $ret = self::outAry($ret, $data, $raw);
             }
-        }
-        $ret = ['code' => $code, 'msg' => $msg,];
-        if ($info) {
-            $ret['data'] = $info;
         }
         return $ret;
     }
@@ -271,15 +247,15 @@ class User extends \ZF\DingTalk
     /**
      * 更新用户数据
      * @param mixed $data 允许为UserInfo对象或JSON串或者数组
+     * @param bool  $raw
      *
      * @return array
      * @static
      * @since  2019.05.16
      */
-    public static function update($data)
+    public static function update($data, $raw = false)
     {
-        $code = -1;
-        $msg = '';
+        $ret = ['code' => -1, 'msg' => '',];
         if ($data instanceof UserInfo) {
             $data = $data->getUpdateData();
         } elseif (is_string($data)) {
@@ -290,55 +266,34 @@ class User extends \ZF\DingTalk
         if ($data) {
             if (count($data) > 1 && isset($data['userid']) && is_string($data['userid']) && $data['userid']) {
                 $url = self::buildOperateUrl('user/update', ['access_token' => '',]);
-                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', '');
-                if (isset($info['errcode']) && isset($info['errmsg'])) {
-                    if ($info['errcode'] == 0) {
-                        $code = 0;
-                        $msg = 'success';
-                    } else {
-                        $code = $info['errcode'];
-                        $msg = $info['errmsg'];
-                    }
-                } else {
-                    $code = 2;
-                    $msg = '数据请求失败';
-                }
+                $data = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', '', $raw);
+                $ret = self::outAry($ret, $data, $raw);
             } else {
                 $code = 1;
                 $msg = '没有需要更新的字段或者缺少更新用户标识';
+                $ret = ['code' => $code, 'msg' => $msg,];
             }
         }
-        return ['code' => $code, 'msg' => $msg,];
+        return $ret;
     }
 
     /**
      * 删除用户
      * @param $userid
+     * @param bool $raw
      *
      * @return array
      * @static
      * @since  2019.05.16
      */
-    public static function delete(string $userid)
+    public static function delete(string $userid, $raw = false)
     {
-        $code = -1;
-        $msg = '';
+        $ret = ['code' => -1, 'msg' => '',];
         if ($userid && is_string($userid)) {
             $url = self::buildOperateUrl('user/delete', ['access_token' => '', 'userid' => $userid,]);
-            $info = self::doRequest($url, [], 'GET', '');
-            if (isset($info['errcode']) && isset($info['errmsg'])) {
-                if ($info['errcode'] == 0) {
-                    $code = 0;
-                    $msg = 'success';
-                } else {
-                    $code = $info['errcode'];
-                    $msg = $info['errmsg'];
-                }
-            } else {
-                $code = 2;
-                $msg = '数据请求失败';
-            }
+            $data = self::doRequest($url, [], 'GET', '', $raw);
+            $ret = self::outAry($ret, $data, $raw);
         }
-        return ['code' => $code, 'msg' => $msg,];
+        return $ret;
     }
 }

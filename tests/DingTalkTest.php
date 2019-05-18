@@ -119,12 +119,12 @@ EOT;
      */
     public function testExtContactInfo()
     {
-        $source = '{"contact":{"title":"CEO","label_ids":[1,3,5],"follower_user_id":"manage","name":"外部客户","state_code":"86","company_name":"测试公司名称","mobile":"1xxxxxxxxxx"}}';
-        $actual = '{"contact":{"title":"首席执行官","label_ids":[1,5],"follower_user_id":"manage","name":"外部客户","state_code":"086","company_name":"测试公司名称","mobile":"1xxxxxxxxx1"}}';
+        $source = '{"title":"CEO","label_ids":[1,3,5],"follower_user_id":"manage","name":"外部客户","state_code":"86","company_name":"测试公司名称","mobile":"1xxxxxxxxxx"}';
+        $actual = '{"title":"首席执行官","label_ids":[1,5],"follower_user_id":"manage","name":"外部客户","state_code":"086","company_name":"测试公司名称","mobile":"1xxxxxxxxx1"}';
         $title = '首席执行官';
         $mobile = '1xxxxxxxxx1';
         $ids = [1, 5,];
-        $update = ['contact' => ['title' => $title, 'label_ids' => $ids, 'state_code' => '086', 'mobile' => $mobile,]];
+        $update = ['title' => $title, 'label_ids' => $ids, 'state_code' => '086', 'mobile' => $mobile, 'follower_user_id' => 'manage', 'name' => '外部客户'];
         $ext = new ExtContactInfo($source);
         $ext->title = $title;
         $ext->label_ids = $ids;

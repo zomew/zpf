@@ -498,6 +498,8 @@ class DingTalk extends Entity
                             $ret = $json;
                         }
                     }
+                } else {
+                    $ret = null;
                 }
             }
         }
@@ -575,8 +577,11 @@ class DingTalk extends Entity
      * @static
      * @since  2019.05.17
      */
-    public static function outAry(array $ret, $data = [], $raw = false)
+    public static function outAry($ret, $data = [], $raw = false)
     {
+        if ($data === null) {
+            $ret = ['code' => 2, 'msg' => '数据请求失败',];
+        }
         if (!$raw && !isset($data['errcode'])) {
             $ret = ['code' => 0, 'msg' => 'success', 'data' => $data,];
         } else {
@@ -587,7 +592,7 @@ class DingTalk extends Entity
                     $ret['code'] = $data['errcode'];
                     if ($data['errcode'] == 0) {
                         $ret['msg'] = 'success';
-                        unset($data['errcode'], $data['errmsg']);
+                        unset($data['errcode'], $data['errmsg'], $data['request_id']);
                         $ret['data'] = $data;
                     }
                 }

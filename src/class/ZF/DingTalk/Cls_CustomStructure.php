@@ -50,6 +50,11 @@ abstract class CustomStructure
     protected $self;
 
     /**
+     * @var array 更新数组必须有的字段
+     */
+    protected $updateNeedField = [];
+
+    /**
      * 将类转为对应JSON串魔术方法
      *
      * @return false|string
@@ -252,9 +257,22 @@ abstract class CustomStructure
                         $value = $this->$real;
                     }
                     break;
+                case 'object':
+                    if (gettype($value) == $type) {
+                        $cls = get_class($this->$real);
+                        $cur = get_class($value);
+                        if ($cls != $cur) {
+                            trigger_error("设置值与原值不是同一类，需要类名：{$cls}，当前类名：{$cur}", E_USER_ERROR);
+                            return;
+                        }
+                    } else {
+                        trigger_error("设置值与原值类型不同", E_USER_ERROR);
+                        return;
+                    }
+                    break;
                 default:
                     if (gettype($value) != $type) {
-                        trigger_error("设置值与原值类型不同，已忽略{$name}的赋值");
+                        trigger_error("设置值与原值类型不同", E_USER_ERROR);
                         return;
                     }
                     break;
@@ -281,17 +299,44 @@ abstract class CustomStructure
     {
         $ret = [];
         if ($this->self->updateField) {
-            foreach ($this->self->updateField as $k => $v) {
-                if (in_array($k, $this->self->jsonStrField)) {
-                    $ret[$k] = json_encode($v);
-                } elseif (in_array($k, $this->self->splitStrField)) {
-                    $ret[$k] = implode($this->self->splitStr, $v);
-                } else {
-                    $ret[$k] = $v;
+            if ($this->self->updateNeedField) {
+                foreach ($this->self->updateNeedField as $k => $v) {
+                    if (is_numeric($k)) {
+                        if (is_string($v) && $v && ($this->$v || gettype($this->$v) == 'boolean')) {
+                            $this->addField($ret, $v, $this->$v);
+                        }
+                    } elseif (is_string($k)) {
+                        if (is_string($v) && $v && ($this->$v || gettype($this->$v) == 'boolean')) {
+                            $this->addField($ret, $k, $this->$v);
+                        }
+                    }
                 }
+            }
+            foreach ($this->self->updateField as $k => $v) {
+                $this->addField($ret, $k, $v);
             }
         }
         return $ret;
+    }
+
+    /**
+     * 添加字段到数组中
+     * @param $ret
+     * @param $k
+     * @param $v
+     *
+     * @return void
+     * @since  2019.05.18
+     */
+    private function addField(&$ret, $k, $v)
+    {
+        if (in_array($k, $this->self->jsonStrField) && is_array($v)) {
+            $ret[$k] = json_encode($v);
+        } elseif (in_array($k, $this->self->splitStrField) && is_array($v)) {
+            $ret[$k] = implode($this->self->splitStr, $v);
+        } else {
+            $ret[$k] = $v;
+        }
     }
 
     /**

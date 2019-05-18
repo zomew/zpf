@@ -86,7 +86,7 @@ class Department extends \ZF\DingTalk
                 $lang = 'zh_CN';
             }
             $url = self::buildOperateUrl('department/get', ['access_token' => '', 'id' => $dept_id, 'lang' => $lang,]);
-            $data = self::doRequest($url, [], 'GET', '', true);
+            $data = self::doRequest($url, [], 'GET', '', $raw);
             $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
@@ -155,16 +155,15 @@ class Department extends \ZF\DingTalk
     /**
      * 创建部门
      * @param $data
+     * @param bool $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function create($data)
+    public static function create($data, $raw = false)
     {
-        $code = -1;
-        $msg = '';
-        $info = '';
+        $ret = ['code' => -1, 'msg' => '',];
         if ($data instanceof DepartmentInfo) {
             $data = $data->getArray();
         } elseif (is_string($data)) {
@@ -182,25 +181,13 @@ class Department extends \ZF\DingTalk
                 }
             }
             if ($need) {
-                $code = 1;
                 $msg = implode(',', $need) . '字段必须设置，请检查参数';
+                $ret = ['code' => 1, 'msg' => $msg,];
             } else {
                 $url = self::buildOperateUrl('department/create', ['access_token' => '',]);
-                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', 'id');
-                if (is_string($info)) {
-                    $code = 0;
-                    $msg = 'success';
-                } elseif (is_array($info)) {
-                    if (isset($info['errcode']) && isset($info['errmsg'])) {
-                        $code = $info['errcode'];
-                        $msg = $info['errmsg'];
-                    }
-                }
+                $data = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', 'id', $raw);
+                $ret = self::outAry($ret, $data, $raw);
             }
-        }
-        $ret = ['code' => $code, 'msg' => $msg,];
-        if ($info) {
-            $ret['data'] = $info;
         }
         return $ret;
     }
@@ -208,16 +195,15 @@ class Department extends \ZF\DingTalk
     /**
      * 更新部门信息
      * @param $data
+     * @param bool $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function update($data)
+    public static function update($data, $raw = false)
     {
-        $code = -1;
-        $msg = '';
-        $rdata = '';
+        $ret = ['code' => -1, 'msg' => '',];
         if ($data instanceof DepartmentInfo) {
             $data = $data->getUpdateData();
         } elseif (is_string($data)) {
@@ -228,58 +214,33 @@ class Department extends \ZF\DingTalk
         if ($data) {
             if (count($data) > 1 && isset($data['id']) && is_string($data['id']) && $data['id']) {
                 $url = self::buildOperateUrl('department/update', ['access_token' => '',]);
-                $info = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', '');
-                if (isset($info['errcode']) && isset($info['errmsg'])) {
-                    if ($info['errcode'] == 0) {
-                        $code = 0;
-                        $msg = 'success';
-                        if (isset($info['id'])) {
-                            $rdata = $info['id'];
-                        }
-                    } else {
-                        $code = $info['errcode'];
-                        $msg = $info['errmsg'];
-                    }
-                } else {
-                    $code = 2;
-                    $msg = '数据请求失败';
-                }
+                $data = self::doRequest($url, json_encode($data, JSON_UNESCAPED_UNICODE), 'POST', 'id', $raw);
+                $ret = self::outAry([], $data, $raw);
             } else {
-                $code = 1;
                 $msg = '没有需要更新的字段或者缺少更新用户标识';
+                $ret = ['code' => 1, 'msg' => $msg,];
             }
         }
-        return ['code' => $code, 'msg' => $msg, 'data' => $rdata,];
+        return $ret;
     }
 
     /**
      * 删除部门
      * @param mixed $dept_id
+     * @param bool  $raw
      *
      * @return array
      * @static
      * @since  2019.05.17
      */
-    public static function delete($dept_id)
+    public static function delete($dept_id, $raw = false)
     {
-        $code = -1;
-        $msg = '';
+        $ret = ['code' => -1, 'msg' => '',];
         if ($dept_id) {
             $url = self::buildOperateUrl('department/delete', ['access_token' => '', 'id' => $dept_id,]);
-            $info = self::doRequest($url, [], 'GET', '');
-            if (isset($info['errcode']) && isset($info['errmsg'])) {
-                if ($info['errcode'] == 0) {
-                    $code = 0;
-                    $msg = 'success';
-                } else {
-                    $code = $info['errcode'];
-                    $msg = $info['errmsg'];
-                }
-            } else {
-                $code = 2;
-                $msg = '数据请求失败';
-            }
+            $data = self::doRequest($url, $ret, 'GET', '', $raw);
+            $ret = self::outAry([], $data, $raw);
         }
-        return ['code' => $code, 'msg' => $msg,];
+        return $ret;
     }
 }

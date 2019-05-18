@@ -28,7 +28,6 @@ class Message extends \ZF\DingTalk
      * @param string $deptidlist
      *
      * @return array|mixed
-     * @throws \Exception
      * @static
      * @since  2019.05.15
      */
@@ -61,7 +60,7 @@ class Message extends \ZF\DingTalk
                 }
                 $ret = @json_decode(Common::postRequest($url, $params), true);
             } else {
-                throw new \Exception('AGENTID不能为空，请检查配置文件');
+                trigger_error('AGENTID不能为空，请检查配置文件', E_USER_ERROR);
             }
         }
         return $ret;
