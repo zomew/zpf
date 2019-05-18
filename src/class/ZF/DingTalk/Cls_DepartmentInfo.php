@@ -117,15 +117,6 @@ class DepartmentInfo extends CustomStructure
             //已经有id就不允许再修改了
             return;
         }
-        $update = true;
-        if (isset($this->$real) && $this->$real == $value) {
-            $update = false;
-        }
-        if ($update) {
-            $this->updateField[$name] = $value;
-            if (isset($this->$real)) {
-                $this->$real = $value;
-            }
-        }
+        parent::magicSet($name, $value);
     }
 }

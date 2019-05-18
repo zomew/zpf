@@ -12,6 +12,7 @@ use \ZF\DingTalk;
 use \ZF\DingTalk\{
     UserInfo,
     DepartmentInfo,
+    ExtContactInfo,
 };
 
 class DingTalkTest extends PHPUnit\Framework\TestCase
@@ -108,5 +109,34 @@ EOT;
         $this->assertEquals($dept->getUpdateData(), $update);
         $data = json_decode($source, true);
         $this->assertEquals(new DepartmentInfo($data), new DepartmentInfo($source));
+    }
+
+    /**
+     * 外部客户信息实体类测试
+     *
+     * @return void
+     * @since  2019.05.18
+     */
+    public function testExtContactInfo()
+    {
+        $source = '{"contact":{"title":"CEO","label_ids":[1,3,5],"follower_user_id":"manage","name":"外部客户","state_code":"86","company_name":"测试公司名称","mobile":"1xxxxxxxxxx"}}';
+        $actual = '{"contact":{"title":"首席执行官","label_ids":[1,5],"follower_user_id":"manage","name":"外部客户","state_code":"086","company_name":"测试公司名称","mobile":"1xxxxxxxxx1"}}';
+        $title = '首席执行官';
+        $mobile = '1xxxxxxxxx1';
+        $ids = [1, 5,];
+        $update = ['contact' => ['title' => $title, 'label_ids' => $ids, 'state_code' => '086', 'mobile' => $mobile,]];
+        $ext = new ExtContactInfo($source);
+        $ext->title = $title;
+        $ext->label_ids = $ids;
+        $ext->follower_user_id = 'manage';
+        $ext->name = '外部客户';
+        $ext->state_code = '086';
+        $ext->company_name = '测试公司名称';
+        $ext->mobile = $mobile;
+        $this->assertEquals($ext->title, $title);
+        $this->assertEquals($ext->__toString(), $actual);
+        $this->assertEquals($ext->getUpdateData(), $update);
+        $data = json_decode($source, true);
+        $this->assertEquals(new ExtContactInfo($data), new ExtContactInfo($source));
     }
 }

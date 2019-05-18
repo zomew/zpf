@@ -137,16 +137,7 @@ class UserInfo extends CustomStructure
             //已经有userid就不允许再修改了
             return;
         }
-        $update = true;
-        if (isset($this->$real) && $this->$real == $value) {
-            $update = false;
-        }
-        if ($update) {
-            $this->updateField[$name] = $value;
-            if (isset($this->$real)) {
-                $this->$real = $value;
-            }
-        }
+        $this->magicSet($name, $value);
     }
 
     /**
@@ -162,13 +153,7 @@ class UserInfo extends CustomStructure
             if ($this->p_userid) {
                 $ret['userid'] = $this->p_userid;
             }
-            foreach ($this->updateField as $k => $v) {
-                if (in_array($k, $this->jsonStrField)) {
-                    $ret[$k] = json_encode($v);
-                } else {
-                    $ret[$k] = $v;
-                }
-            }
+            $ret = array_merge($ret, parent::getUpdateData());
         }
         return $ret;
     }
