@@ -55,6 +55,11 @@ abstract class CustomStructure
     protected $updateNeedField = [];
 
     /**
+     * @var array 转字符串需要忽略的字段
+     */
+    protected $toStringNeedHideField = [];
+
+    /**
      * 将类转为对应JSON串魔术方法
      *
      * @return false|string
@@ -80,31 +85,35 @@ abstract class CustomStructure
                 $name = $v->getName();
                 if (strpos($name, 'p_') === 0) {
                     $outname = str_replace('p_', '', $name);
-                    $value = $this->self->$name;
-                    if ($value) {
-                        if (is_array($value)) {
-                            if (in_array($outname, $this->self->jsonStrField)) {
-                                $ret[$outname] = json_encode($value, JSON_UNESCAPED_UNICODE);
-                            } elseif (in_array($outname, $this->self->splitStrField)) {
-                                $ret[$outname] = implode($this->self->splitStr, $value);
+                    if (!in_array($outname, $this->toStringNeedHideField)) {
+                        $value = $this->self->$name;
+                        if ($value || (gettype($value) == 'integer' && $value !== null)) {
+                            if (is_array($value)) {
+                                if (in_array($outname, $this->self->jsonStrField)) {
+                                    $ret[$outname] = json_encode($value, JSON_UNESCAPED_UNICODE);
+                                } elseif (in_array($outname, $this->self->splitStrField)) {
+                                    $ret[$outname] = implode($this->self->splitStr, $value);
+                                } else {
+                                    $ret[$outname] = $value;
+                                }
                             } else {
                                 $ret[$outname] = $value;
                             }
-                        } else {
-                            $ret[$outname] = $value;
                         }
                     }
                 }
             }
             if ($this->self->updateField) {
                 foreach ($this->self->updateField as $k => $v) {
-                    if (!isset($ret[$k])) {
-                        if (is_array($v) && in_array($k, $this->self->jsonStrField)) {
-                            $ret[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
-                        } elseif (is_array($v) && in_array($k, $this->self->splitStrField)) {
-                            $ret[$k] = implode($this->self->splitStr, $v);
-                        } else {
-                            $ret[$k] = $v;
+                    if (!in_array($k, $this->toStringNeedHideField)) {
+                        if (!isset($ret[$k])) {
+                            if (is_array($v) && in_array($k, $this->self->jsonStrField)) {
+                                $ret[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
+                            } elseif (is_array($v) && in_array($k, $this->self->splitStrField)) {
+                                $ret[$k] = implode($this->self->splitStr, $v);
+                            } else {
+                                $ret[$k] = $v;
+                            }
                         }
                     }
                 }
@@ -270,6 +279,9 @@ abstract class CustomStructure
                         return;
                     }
                     break;
+                case 'NULL':
+                    //空值，直接设置
+                    break;
                 default:
                     if (gettype($value) != $type) {
                         trigger_error("设置值与原值类型不同", E_USER_ERROR);
@@ -301,13 +313,14 @@ abstract class CustomStructure
         if ($this->self->updateField) {
             if ($this->self->updateNeedField) {
                 foreach ($this->self->updateNeedField as $k => $v) {
+                    $value = $this->$v;
                     if (is_numeric($k)) {
-                        if (is_string($v) && $v && ($this->$v || gettype($this->$v) == 'boolean')) {
-                            $this->addField($ret, $v, $this->$v);
+                        if (is_string($v) && $v && ($value || gettype($value) == 'boolean')) {
+                            $this->addField($ret, $v, $value);
                         }
                     } elseif (is_string($k)) {
-                        if (is_string($v) && $v && ($this->$v || gettype($this->$v) == 'boolean')) {
-                            $this->addField($ret, $k, $this->$v);
+                        if (is_string($v) && $v && ($value || gettype($value) == 'boolean')) {
+                            $this->addField($ret, $k, $value);
                         }
                     }
                 }
@@ -328,7 +341,7 @@ abstract class CustomStructure
      * @return void
      * @since  2019.05.18
      */
-    private function addField(&$ret, $k, $v)
+    protected function addField(&$ret, $k, $v)
     {
         if (in_array($k, $this->self->jsonStrField) && is_array($v)) {
             $ret[$k] = json_encode($v);

@@ -93,6 +93,15 @@ class Message extends \ZF\DingTalk
         return $ret;
     }
 
+    /**
+     * 获取消息发送结果
+     * @param int  $task_id
+     * @param bool $raw
+     *
+     * @return array
+     * @static
+     * @since  2019.05.20
+     */
     public static function getSendResult($task_id = 0, $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];

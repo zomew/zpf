@@ -28,8 +28,8 @@ class DepartmentInfo extends CustomStructure
     /**
      * @var int 部门ID
      */
-    public $id = 0;
-    protected $p_id = 0;
+    public $id = null;
+    protected $p_id = null;
 
     /**
      * @var string 部门名称

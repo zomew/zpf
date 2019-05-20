@@ -14,6 +14,7 @@ use \ZF\DingTalk\{
     DepartmentInfo,
     ExtContactInfo,
     MessageInfo,
+    ChatInfo,
 };
 
 class DingTalkTest extends PHPUnit\Framework\TestCase
@@ -160,5 +161,26 @@ EOT;
         $msg->content = 'TESTTEST';
         $actual = '{"msgtype":"text","text":{"content":"TESTTEST"}}';
         $this->assertEquals($msg->__toString(), $actual);
+    }
+
+    /**
+     * 群消息实体类测试
+     *
+     * @return void
+     * @since  2019.05.20
+     */
+    public function testChatInfo()
+    {
+        $actual = '{"name":"Demo","owner":"manage","useridlist":["test","5555"],"extidlist":["9999","1111"],"validationType":0,"mentionAllAuthority":1}';
+        $update = ['name' => 'Demo', 'owner' => 'manage', 'add_useridlist' => ['test', '5555',], 'add_extidlist' => ['9999', '1111',], "validationType" => 0,"mentionAllAuthority" => 1,];
+        $ci = new ChatInfo();
+        $ci->name = 'Demo';
+        $ci->owner = 'manage';
+        $ci->useridlist = ['test', '5555',];
+        $ci->extidlist = ['9999', '1111',];
+        $ci->validationType = 0;
+        $ci->mentionAllAuthority = 1;
+        $this->assertEquals($ci->__toString(), $actual);
+        $this->assertEquals($ci->getUpdateData(), $update);
     }
 }

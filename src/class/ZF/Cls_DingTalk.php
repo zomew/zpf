@@ -471,12 +471,14 @@ class DingTalk extends Entity
      * @param string $type
      * @param string $keys
      * @param bool   $raw
+     * @param array  $header
+     * @param array  $ssl
      *
      * @return array|mixed
      * @static
      * @since  2019.05.16
      */
-    public static function doRequest(string $url, $data = [], $type = '', $keys = '', &$raw = false)
+    public static function doRequest(string $url, $data = [], $type = '', $keys = '', &$raw = false, $header = [], $ssl = [])
     {
         $ret = [];
         if ($url) {
@@ -491,10 +493,10 @@ class DingTalk extends Entity
             if (in_array($type, ['POST', 'GET',])) {
                 $json = [];
                 if ($type == 'GET') {
-                    $json = @json_decode(Common::getRequest(self::appendParams($data, $url)), true);
+                    $json = @json_decode(Common::getRequest(self::appendParams($data, $url), $header, $ssl), true);
                 }
                 if ($type == 'POST') {
-                    $json = @json_decode(Common::postRequest($url, $data), true);
+                    $json = @json_decode(Common::postRequest($url, $data, $header, $ssl), true);
                 }
                 if (is_array($json) && isset($json['errcode'])) {
                     if ($raw || $keys == '') {
@@ -606,6 +608,29 @@ class DingTalk extends Entity
                 }
                 if (isset($data['errmsg'])) {
                     $ret['msg'] = $data['errmsg'];
+                }
+            }
+        }
+        return $ret;
+    }
+
+    /**
+     * 组装Header
+     * @param array $header
+     *
+     * @return array
+     * @static
+     * @since  2019.05.20
+     */
+    protected static function buildHeader($header = [])
+    {
+        $ret = [];
+        if ($header && is_array($header)) {
+            foreach ($header as $k => $v) {
+                if (is_numeric($k)) {
+                    $ret[] = $v;
+                } else {
+                    $ret[] = trim($k, ' :') . ':' . trim($v);
                 }
             }
         }
