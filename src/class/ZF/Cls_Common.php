@@ -522,6 +522,9 @@ class Common
                     }
                     $ret[$key] = $value;
                 }
+                if (count($need) == 1 && isset($key) && $key) {
+                    $ret = $ret[$key];
+                }
             }
         }
         return $ret;

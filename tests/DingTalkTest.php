@@ -13,6 +13,7 @@ use \ZF\DingTalk\{
     UserInfo,
     DepartmentInfo,
     ExtContactInfo,
+    MessageInfo,
 };
 
 class DingTalkTest extends PHPUnit\Framework\TestCase
@@ -138,5 +139,26 @@ EOT;
         $this->assertEquals($ext->getUpdateData(), $update);
         $data = json_decode($source, true);
         $this->assertEquals(new ExtContactInfo($data), new ExtContactInfo($source));
+    }
+
+    /**
+     * 发送消息实体类测试
+     *
+     * @return void
+     * @since  2019.05.20
+     */
+    public function testMessageInfo()
+    {
+        $source = '{"msgtype":"oa","oa":{"message_url":"","head":{"bgcolor":"FFBBBBBB","text":"TEST Info"},"body":[]}}';
+        $actual = '{"msgtype":"oa","oa":{"message_url":"","head":{"bgcolor":"FFBBBBBB","text":"Demo"},"body":[]}}';
+        $msg = new MessageInfo($source);
+        $msg->safe = true;
+        $msg->head = ['demo' => '1234', 'demo1' => [1,2,3,], 'text' => 'Demo',];
+        $this->assertEquals($msg->__toString(), $actual);
+        $msg = new MessageInfo();
+        $msg->msgtype = 'text';
+        $msg->content = 'TESTTEST';
+        $actual = '{"msgtype":"text","text":{"content":"TESTTEST"}}';
+        $this->assertEquals($msg->__toString(), $actual);
     }
 }

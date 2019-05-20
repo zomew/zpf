@@ -347,14 +347,17 @@ class DingTalk extends Entity
             $key = trim($k);
             if (is_string($v) || is_numeric($v)) {
                 if ($v === '') {
-                    switch ($key) {
+                    switch (strtolower($key)) {
                         case 'access_token':
+                        case 'accesstoken':
                             $params_ary[] = "{$key}=" . self::getAccessToken();
                             break;
                         case 'appkey':
+                        case 'app_key':
                             $params_ary[] = "{$key}=" . $config['APP_KEY'];
                             break;
                         case 'appsecret':
+                        case 'app_secret':
                             // 扫码登录部分键值相同了
                             if (stripos($opt, '/connect/') !== 0) {
                                 $params_ary[] = "{$key}=" . $config['APP_SECRET'];
@@ -363,7 +366,12 @@ class DingTalk extends Entity
                             }
                             break;
                         case 'appid':
+                        case 'app_id':
                             $params_ary[] = "{$key}=" . $config['APPID'];
+                            break;
+                        case 'agent_id':
+                        case 'agentid':
+                            $params_ary[] = "{$key}=" . $config['AGENTID'];
                             break;
                         default:
                             $params_ary[] = "{$key}=";

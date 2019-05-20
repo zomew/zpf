@@ -22,16 +22,17 @@ use \ZF\Common;
 class Message extends \ZF\DingTalk
 {
     /**
-     * 异步发送消息
+     * 异步发送消息，返回task_id
      * @param array  $msg
      * @param string $useridlist
      * @param string $deptidlist
+     * @param bool   $raw
      *
-     * @return array|mixed
+     * @return array
      * @static
      * @since  2019.05.15
      */
-    public static function asyncSendV2($msg = [], $useridlist = '', $deptidlist = '')
+    public static function asyncSendV2($msg = [], $useridlist = '', $deptidlist = '', $raw = false)
     {
         $ret = ['errcode' => -1, 'errmsg' => '',];
         if ($msg && ($useridlist || $deptidlist)) {
@@ -58,10 +59,52 @@ class Message extends \ZF\DingTalk
                 } else {
                     $params['msg'] = $msg;
                 }
-                $ret = @json_decode(Common::postRequest($url, $params), true);
+                $data = self::doRequest($url, $params, 'POST', 'task_id', $raw);
+                $ret = self::outAry($ret, $data, $raw);
             } else {
                 trigger_error('AGENTID不能为空，请检查配置文件', E_USER_ERROR);
             }
+        }
+        return $ret;
+    }
+
+    /**
+     * 查看消息发送进度
+     * @param int  $task_id
+     * @param bool $raw
+     *
+     * @return array
+     * @static
+     * @since  2019.05.20
+     */
+    public static function getSendProgress($task_id = 0, $raw = false)
+    {
+        $ret = ['code' => -1, 'msg' => '',];
+        if ($task_id > 0) {
+            $config = self::getConfig();
+            $data = ['agent_id' => '', 'task_id' => $task_id,];
+            if (isset($config['AGENTID'])) {
+                $data['agent_id'] = $config['AGENTID'];
+            }
+            $url = self::buildOperateUrl('topapi/message/corpconversation/getsendprogress', ['access_token' => '',]);
+            $data = self::doRequest($url, $data, 'POST', 'progress', $raw);
+            $ret = self::outAry($ret, $data, $raw);
+        }
+        return $ret;
+    }
+
+    public static function getSendResult($task_id = 0, $raw = false)
+    {
+        $ret = ['code' => -1, 'msg' => '',];
+        if ($task_id > 0) {
+            $config = self::getConfig();
+            $data = ['agent_id' => '', 'task_id' => $task_id,];
+            if (isset($config['AGENTID'])) {
+                $data['agent_id'] = $config['AGENTID'];
+            }
+            $url = self::buildOperateUrl('topapi/message/corpconversation/getsendresult', ['access_token' => '',]);
+            $data = self::doRequest($url, $data, 'POST', 'send_result', $raw);
+            $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
     }
