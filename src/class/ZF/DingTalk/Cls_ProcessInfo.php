@@ -80,6 +80,8 @@ class ProcessInfo extends \ZF\DingTalk\CustomStructure
 
     /**
      * @var array 审批流表单参数
+     * 示例值：[{"ext_value":"扩展值","name":"标题1","value":"标题标题"},{"name":"日期","value":"2019-05-21"},{"value":"null"}]
+     * 说明文字只需要"value"，不需要"name"
      */
     public $form_component_values = [];
     protected $p_form_component_values = [];
