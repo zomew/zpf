@@ -117,4 +117,42 @@ class Message extends \ZF\DingTalk
         }
         return $ret;
     }
+
+    /**
+     * 发送消息到群消息
+     * @param string $sender
+     * @param string $cid
+     * @param string $msg
+     * @param bool   $raw
+     *
+     * @return array
+     * @static
+     * @since  2019.05.20
+     * @see    https://open-doc.dingtalk.com/microapp/serverapi2/pm0m06
+     */
+    public static function sendToConversation($sender = '', $cid = '', $msg = '', $raw = false)
+    {
+        $ret = ['code' => -1, 'msg' => '',];
+        if ($sender && $cid && $msg) {
+            if ($msg instanceof MessageInfo) {
+                $msg = $msg->__toString();
+            } elseif (is_array($msg)) {
+                $msg = json_encode($msg, JSON_UNESCAPED_UNICODE);
+            } elseif (!is_string($msg)) {
+                $msg = '';
+            }
+            if ($msg) {
+                $data = ['sender' => $sender, 'cid' => $cid, 'msg' => $msg,];
+                $url = self::buildOperateUrl('message/send_to_conversation', ['access_token' => '',]);
+                $data = self::doRequest($url, $data, 'POST', 'receiver', $raw);
+                if (is_string($data)) {
+                    $data = explode('|', $data);
+                }
+                $ret = self::outAry($ret, $data, $raw);
+            } else {
+                $ret = ['code' => 1, 'msg' => '所发送的消息格式有误',];
+            }
+        }
+        return $ret;
+    }
 }

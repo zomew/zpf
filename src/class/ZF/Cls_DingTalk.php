@@ -26,6 +26,16 @@ class DingTalk extends Entity
     private static $Redis_Token_Key = 'DingTalk_AccessToken';
 
     /**
+     * @var array 发送标头
+     */
+    public static $header = ['Content-Type' => 'application/json',];
+
+    /**
+     * @var bool 自动发送标头
+     */
+    public static $autoSendHeader = false;
+
+    /**
      * 演示自动加载配置名
      *
      * @var string
@@ -478,12 +488,23 @@ class DingTalk extends Entity
      * @static
      * @since  2019.05.16
      */
-    public static function doRequest(string $url, $data = [], $type = '', $keys = '', &$raw = false, $header = [], $ssl = [])
-    {
+    public static function doRequest(
+        string $url,
+        $data = [],
+        $type = '',
+        $keys = '',
+        &$raw = false,
+        $header = [],
+        $ssl = []
+    ) {
         $ret = [];
         if ($url) {
             if ($type == '') {
                 $type = 'GET';
+            }
+            $cls = get_called_class();
+            if (!$header && property_exists($cls, 'autoSendHeader') && $cls::$autoSendHeader && $cls::$header) {
+                $header = self::buildHeader($cls::$header);
             }
             $config = self::getConfig();
             if (isset($config['FORCE_GET_RAW_DATA']) && $config['FORCE_GET_RAW_DATA']) {

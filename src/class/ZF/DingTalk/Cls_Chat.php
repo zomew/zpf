@@ -23,9 +23,9 @@ use \ZF\DingTalk\ChatInfo;
 class Chat extends \ZF\DingTalk
 {
     /**
-     * @var array 发送标头
+     * @var bool 自动发送标头
      */
-    public static $header = ['Content-Type' => 'application/json',];
+    public static $autoSendHeader = true;
 
     /**
      * 发送群消息
