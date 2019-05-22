@@ -15,6 +15,7 @@ use \ZF\DingTalk\{
     ExtContactInfo,
     MessageInfo,
     ChatInfo,
+    Crypto
 };
 
 class DingTalkTest extends PHPUnit\Framework\TestCase
@@ -182,5 +183,26 @@ EOT;
         $ci->mentionAllAuthority = 1;
         $this->assertEquals($ci->__toString(), $actual);
         $this->assertEquals($ci->getUpdateData(), $update);
+    }
+
+    /**
+     * 测试解密模块
+     *
+     * @return void
+     * @since  2019.05.22
+     */
+    public function testCrypto()
+    {
+        $time = 1558509909;
+        $msg = date('Y-m-d H:i:s', $time) . '_Jamers';
+        $aes = 'gqt5mlqa5y2leqzdn7xnqzuyxhh7op9xwu584t06vqz';
+        $token = 'demodemo';
+        $nonce = 'oqctu1be52';
+        $suite = '1011111';
+
+        $co = new Crypto($token, $aes, $suite);
+        $data = $co->encryptMsg($msg, $nonce, $time);
+        $dec = $co->decryptMsg($data['msg_signature'], $data['timeStamp'], $data['nonce'], $data['encrypt']);
+        $this->assertEquals($dec, $msg);
     }
 }

@@ -187,8 +187,8 @@ class Common
                 }
             }
         }
+        curl_setopt($ch, CURLOPT_POST, 1);
         if ($post) {
-            curl_setopt($ch, CURLOPT_POST, 1);
             $post = (is_array($post)) ? http_build_query($post) : $post;
             curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         }
