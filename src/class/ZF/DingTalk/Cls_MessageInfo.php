@@ -53,8 +53,7 @@ class MessageInfo extends CustomStructure
             'single_url' => null,
             'btn_orientation' => null,
             'btn_json_list' => null,
-
-        ]
+        ],
     ];
 
     /**
