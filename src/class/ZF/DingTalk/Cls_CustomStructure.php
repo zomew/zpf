@@ -67,17 +67,6 @@ abstract class CustomStructure
      */
     public function __toString()
     {
-        return $this->magicToString();
-    }
-
-    /**
-     * 让魔术方法可以复用
-     *
-     * @return false|string
-     * @since  2019.05.18
-     */
-    protected function magicToString()
-    {
         $ret = [];
         try {
             $ref = new \ReflectionClass(get_class($this));
@@ -198,18 +187,6 @@ abstract class CustomStructure
      */
     public function __get(string $name)
     {
-        return $this->magicGet($name);
-    }
-
-    /**
-     * 定义可调用的方法，保证代码复用
-     * @param string $name
-     *
-     * @return mixed|null
-     * @since  2019.05.18
-     */
-    protected function magicGet(string $name)
-    {
         $ret = null;
         $real = 'p_' . $name;
         if (isset($this->self->$real)) {
@@ -229,19 +206,6 @@ abstract class CustomStructure
      * @since  2019.05.16
      */
     public function __set(string $name, $value)
-    {
-        $this->magicSet($name, $value);
-    }
-
-    /**
-     * 保证正常情况下还能调用，简单重复代码段
-     * @param string $name
-     * @param        $value
-     *
-     * @return void
-     * @since  2019.05.18
-     */
-    protected function magicSet(string $name, $value)
     {
         $real = 'p_' . $name;
         $update = true;

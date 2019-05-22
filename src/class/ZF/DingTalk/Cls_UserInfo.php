@@ -137,7 +137,7 @@ class UserInfo extends CustomStructure
             //已经有userid就不允许再修改了
             return;
         }
-        $this->magicSet($name, $value);
+        parent::__set($name, $value);
     }
 
     /**

@@ -91,7 +91,7 @@ class Process extends \ZF\DingTalk
         if ($start_time <= 0) {
             $start_time = strtotime(date('Y-m-d')) * 1000;
         }
-        if (strlen(strval($start_time)) <= 10) {
+        if (strlen(strval($start_time)) <= 12) {
             $start_time *= 1000;
         }
         if ($size < 0) {
@@ -100,7 +100,7 @@ class Process extends \ZF\DingTalk
         if ($process_code && $start_time) {
             $data = ['process_code' => $process_code, 'start_time' => $start_time,];
             if ($end_time > 0) {
-                if (strlen(strval($end_time)) <= 10) {
+                if (strlen(strval($end_time)) <= 12) {
                     $end_time *= 1000;
                 }
                 $data['end_time'] = $end_time;

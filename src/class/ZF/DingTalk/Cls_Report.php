@@ -53,13 +53,13 @@ class Report extends \ZF\DingTalk
         if ($start_time <= 0) {
             $start_time = strtotime(date('Y-m-d')) * 1000;
         }
-        if (strlen(strval($start_time)) <= 10) {
+        if (strlen(strval($start_time)) <= 12) {
             $start_time *= 1000;
         }
         if ($end_time <= 0) {
             $end_time = time() * 1000;
         }
-        if (strlen(strval($end_time)) <= 10) {
+        if (strlen(strval($end_time)) <= 12) {
             $end_time *= 1000;
         }
         if ($start_time && $end_time && $template_name) {

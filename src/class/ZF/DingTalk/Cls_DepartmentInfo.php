@@ -117,6 +117,6 @@ class DepartmentInfo extends CustomStructure
             //已经有id就不允许再修改了
             return;
         }
-        parent::magicSet($name, $value);
+        parent::__set($name, $value);
     }
 }
