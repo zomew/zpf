@@ -178,6 +178,9 @@ namespace {
                 //应用管理后台登录参数： https://open-doc.dingtalk.com/microapp/serverapi2/xswxhg
                 'CORP_ID' => '',
                 'CORP_SECRET' => '',
+                //回调相关参数
+                'TOKEN' => '',
+                'ENCODING_AES_KEY' => '',
                 //移动登录参数： https://open-doc.dingtalk.com/microapp/serverapi2/kymkv6
                 'APPID' => '',
                 'APPSECRET' => '',

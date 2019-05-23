@@ -8,6 +8,8 @@
  */
 namespace ZF\DingTalk;
 
+use \ZF\DingTalk as DT;
+
 /**
  * 阿里钉钉加密相关类
  *
@@ -65,32 +67,45 @@ class Crypto
      * 实例化
      * @param string $token
      * @param string $encodingAesKey
-     * @param string $suiteKey
+     * @param string $corpId
      */
-    public function __construct($token = '', $encodingAesKey = '', $suiteKey = '')
+    public function __construct($token = '', $encodingAesKey = '', $corpId = '')
     {
-        $this->init($token, $encodingAesKey, $suiteKey);
+        $this->init($token, $encodingAesKey, $corpId);
     }
 
     /**
      * 初始化相关参数
      * @param string $token
      * @param string $encodingAesKey
-     * @param string $suiteKey
+     * @param string $corpId
      *
      * @return void
      * @since  2019.05.22
      */
-    public function init($token = '', $encodingAesKey = '', $suiteKey = '')
+    public function init($token = '', $encodingAesKey = '', $corpId = '')
     {
+        $config = DT::getConfig();
         if ($token) {
             $this->m_token = $token;
+        } else {
+            if (isset($config['TOKEN']) && $config['TOKEN']) {
+                $this->m_token = $config['TOKEN'];
+            }
         }
         if ($encodingAesKey) {
             $this->m_encodingAesKey = $encodingAesKey;
+        } else {
+            if (isset($config['ENCODING_AES_KEY']) && $config['ENCODING_AES_KEY']) {
+                $this->m_encodingAesKey = $config['ENCODING_AES_KEY'];
+            }
         }
-        if ($suiteKey) {
-            $this->m_suiteKey = $suiteKey;
+        if ($corpId) {
+            $this->m_suiteKey = $corpId;
+        } else {
+            if (isset($config['CORP_ID']) && $config['CORP_ID']) {
+                $this->m_suiteKey = $config['CORP_ID'];
+            }
         }
     }
 
@@ -141,13 +156,14 @@ class Crypto
     public function decryptMsg($signature, $timestamp = '', $nonce = '', $encrypt = '')
     {
         $ret = '';
-        if (is_array($signature) && isset($signature['msg_signature']) && isset($signature['encrypt'])
-            && isset($signature['timeStamp']) && isset($signature['nonce'])
+        if (is_array($signature) && (isset($signature['msg_signature']) || isset($signature['signature']))
+            && (isset($signature['timeStamp']) || isset($signature['timestamp'])) && isset($signature['nonce'])
+            && isset($signature['encrypt'])
         ) {
             $encrypt = $signature['encrypt'];
-            $timestamp = $signature['timeStamp'];
+            $timestamp = isset($signature['timeStamp']) ? $signature['timeStamp']: $signature['timestamp'];
             $nonce = $signature['nonce'];
-            $signature = $signature['msg_signature'];
+            $signature = isset($signature['msg_signature']) ? $signature['msg_signature'] : $signature['signature'];
         }
         $pc = new Prpcrypt($this->m_encodingAesKey);
         $sha1 = self::getSHA1($this->m_token, $timestamp, $nonce, $encrypt);

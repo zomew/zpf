@@ -66,18 +66,25 @@ class CallBack extends \ZF\DingTalk
     /**
      * 注册业务事件回调
      * @param array  $tag
+     * @param string $url
      * @param string $token
      * @param string $aes
-     * @param string $url
      * @param bool   $raw
      *
      * @return array
      * @static
      * @since  2019.05.23
      */
-    public static function registerCallBack($tag = [], $token = '', $aes = '', $url = '', $raw = false)
+    public static function registerCallBack($tag = [], $url = '', $token = '', $aes = '', $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
+        $config = self::getConfig();
+        if ($token == '' && isset($config['TOKEN']) && $config['TOKEN']) {
+            $token = $config['TOKEN'];
+        }
+        if ($aes == '' && isset($config['ENCODING_AES_KEY']) && $config['ENCODING_AES_KEY']) {
+            $aes = $config['ENCODING_AES_KEY'];
+        }
         if ($tag && $token && $aes && $url) {
             $data = [
                 'call_back_tag' => $tag,
@@ -87,7 +94,7 @@ class CallBack extends \ZF\DingTalk
             ];
 
             $url = self::buildOperateUrl('call_back/register_call_back', ['access_token' => '',]);
-            $data = self::doRequest($url, json_encode($data), 'POST', 'progress', $raw);
+            $data = self::doRequest($url, json_encode($data), 'POST', '', $raw);
             $ret = self::outAry($ret, $data, $raw);
         }
         return $ret;
@@ -113,18 +120,25 @@ class CallBack extends \ZF\DingTalk
     /**
      * 更新事件回调
      * @param array  $tag
+     * @param string $url
      * @param string $token
      * @param string $aes
-     * @param string $url
      * @param bool   $raw
      *
      * @return array
      * @static
      * @since  2019.05.23
      */
-    public static function updateCallBack($tag = [], $token = '', $aes = '', $url = '', $raw = false)
+    public static function updateCallBack($tag = [], $url = '', $token = '', $aes = '', $raw = false)
     {
         $ret = ['code' => -1, 'msg' => '',];
+        $config = self::getConfig();
+        if ($token == '' && isset($config['TOKEN']) && $config['TOKEN']) {
+            $token = $config['TOKEN'];
+        }
+        if ($aes == '' && isset($config['ENCODING_AES_KEY']) && $config['ENCODING_AES_KEY']) {
+            $aes = $config['ENCODING_AES_KEY'];
+        }
         if ($tag && $token && $aes && $url) {
             $data = [
                 'call_back_tag' => $tag,
