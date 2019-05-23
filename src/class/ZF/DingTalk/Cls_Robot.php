@@ -23,6 +23,16 @@ class Robot extends \ZF\DingTalk
      */
     public static $autoSendHeader = true;
 
+    /**
+     * 发送机器人消息
+     * @param      $token
+     * @param      $msg
+     * @param bool $raw
+     *
+     * @return array
+     * @static
+     * @since  2019.05.23
+     */
     public static function sendMsg($token, $msg, $raw = false)
     {
         if ($msg instanceof MessageInfo || $msg instanceof RobotInfo) {

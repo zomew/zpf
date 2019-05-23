@@ -25,6 +25,7 @@ class Common
         'SSLCERTPASSWD' => '',
         'SSLKEYTYPE' => '',
         'SSLKEY' => '',
+        'SAFE_UPLOAD' => '',
     );
 
     /**
@@ -177,7 +178,7 @@ class Common
             foreach (self::$ssl_config as $k => $v) {
                 $key = "CURLOPT_{$k}";
                 $value = '';
-                if (isset($ssl[$k]) && $ssl[$k]) {
+                if (isset($ssl[$k])) {
                     $value = $ssl[$k];
                 } elseif (trim($v)) {
                     $value = $v;
@@ -189,7 +190,9 @@ class Common
         }
         curl_setopt($ch, CURLOPT_POST, 1);
         if ($post) {
-            $post = (is_array($post)) ? http_build_query($post) : $post;
+            if (!isset($ssl['SAFE_UPLOAD'])) {
+                $post = (is_array($post)) ? http_build_query($post) : $post;
+            }
             curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         }
         $res = curl_exec($ch);

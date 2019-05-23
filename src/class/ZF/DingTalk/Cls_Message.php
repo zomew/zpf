@@ -34,7 +34,14 @@ class Message extends \ZF\DingTalk
      */
     public static function asyncSendV2($msg = [], $useridlist = '', $deptidlist = '', $raw = false)
     {
-        $ret = ['errcode' => -1, 'errmsg' => '',];
+        $ret = ['errcode' => -1, 'errmsg' => '提交数据不合法',];
+        if ($msg instanceof MessageInfo) {
+            $msg = $msg->getArray();
+        } elseif (is_string($msg)) {
+            $msg = @json_decode($msg, true);
+        } elseif (!is_array($msg)) {
+            $msg = [];
+        }
         if ($msg && ($useridlist || $deptidlist)) {
             $config = self::getConfig();
             if (isset($config['AGENTID']) && $config['AGENTID']) {

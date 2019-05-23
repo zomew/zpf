@@ -138,9 +138,17 @@ class Crypto
      * @return mixed|string
      * @since  2019.05.22
      */
-    public function decryptMsg($signature, $timestamp, $nonce, $encrypt)
+    public function decryptMsg($signature, $timestamp = '', $nonce = '', $encrypt = '')
     {
         $ret = '';
+        if (is_array($signature) && isset($signature['msg_signature']) && isset($signature['encrypt'])
+            && isset($signature['timeStamp']) && isset($signature['nonce'])
+        ) {
+            $encrypt = $signature['encrypt'];
+            $timestamp = $signature['timeStamp'];
+            $nonce = $signature['nonce'];
+            $signature = $signature['msg_signature'];
+        }
         $pc = new Prpcrypt($this->m_encodingAesKey);
         $sha1 = self::getSHA1($this->m_token, $timestamp, $nonce, $encrypt);
         if ($sha1 && $sha1 == $signature) {
