@@ -192,9 +192,9 @@ class ChatInfo extends \ZF\DingTalk\CustomStructure
     public function getUpdateData()
     {
         $ret = [];
-        if ($this->self->updateField) {
-            if ($this->self->updateNeedField) {
-                foreach ($this->self->updateNeedField as $k => $v) {
+        if ($this->updateField) {
+            if ($this->updateNeedField) {
+                foreach ($this->updateNeedField as $k => $v) {
                     $value = $this->$v;
                     if (is_numeric($k)) {
                         if (is_string($v) && $v && ($value || gettype($value) == 'boolean')) {
@@ -207,7 +207,7 @@ class ChatInfo extends \ZF\DingTalk\CustomStructure
                     }
                 }
             }
-            foreach ($this->self->updateField as $k => $v) {
+            foreach ($this->updateField as $k => $v) {
                 if (!in_array($k, ['useridlist', 'extidlist',])) {
                     $this->addField($ret, $k, $v);
                 }

@@ -45,11 +45,6 @@ abstract class CustomStructure
     protected $isConstruct = false;
 
     /**
-     * @var object 子类对象
-     */
-    protected $self;
-
-    /**
      * @var array 更新数组必须有的字段
      */
     protected $updateNeedField = [];
@@ -75,13 +70,13 @@ abstract class CustomStructure
                 if (strpos($name, 'p_') === 0) {
                     $outname = str_replace('p_', '', $name);
                     if (!in_array($outname, $this->toStringNeedHideField)) {
-                        $value = $this->self->$name;
+                        $value = $this->$name;
                         if ($value || (gettype($value) == 'integer' && $value !== null)) {
                             if (is_array($value)) {
-                                if (in_array($outname, $this->self->jsonStrField)) {
+                                if (in_array($outname, $this->jsonStrField)) {
                                     $ret[$outname] = json_encode($value, JSON_UNESCAPED_UNICODE);
-                                } elseif (in_array($outname, $this->self->splitStrField)) {
-                                    $ret[$outname] = implode($this->self->splitStr, $value);
+                                } elseif (in_array($outname, $this->splitStrField)) {
+                                    $ret[$outname] = implode($this->splitStr, $value);
                                 } else {
                                     $ret[$outname] = $value;
                                 }
@@ -92,14 +87,14 @@ abstract class CustomStructure
                     }
                 }
             }
-            if ($this->self->updateField) {
-                foreach ($this->self->updateField as $k => $v) {
+            if ($this->updateField) {
+                foreach ($this->updateField as $k => $v) {
                     if (!in_array($k, $this->toStringNeedHideField)) {
                         if (!isset($ret[$k])) {
-                            if (is_array($v) && in_array($k, $this->self->jsonStrField)) {
+                            if (is_array($v) && in_array($k, $this->jsonStrField)) {
                                 $ret[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
-                            } elseif (is_array($v) && in_array($k, $this->self->splitStrField)) {
-                                $ret[$k] = implode($this->self->splitStr, $v);
+                            } elseif (is_array($v) && in_array($k, $this->splitStrField)) {
+                                $ret[$k] = implode($this->splitStr, $v);
                             } else {
                                 $ret[$k] = $v;
                             }
@@ -140,7 +135,6 @@ abstract class CustomStructure
                 }
             }
         }
-        $this->self = &$this;
     }
 
     /**
@@ -189,10 +183,10 @@ abstract class CustomStructure
     {
         $ret = null;
         $real = 'p_' . $name;
-        if (isset($this->self->$real)) {
-            $ret = $this->self->$real;
-        } elseif (isset($this->self->updateField[$name])) {
-            $ret = $this->self->updateField[$name];
+        if (isset($this->$real)) {
+            $ret = $this->$real;
+        } elseif (isset($this->updateField[$name])) {
+            $ret = $this->updateField[$name];
         }
         return $ret;
     }
@@ -274,9 +268,9 @@ abstract class CustomStructure
     public function getUpdateData()
     {
         $ret = [];
-        if ($this->self->updateField) {
-            if ($this->self->updateNeedField) {
-                foreach ($this->self->updateNeedField as $k => $v) {
+        if ($this->updateField) {
+            if ($this->updateNeedField) {
+                foreach ($this->updateNeedField as $k => $v) {
                     $value = $this->$v;
                     if (is_numeric($k)) {
                         if (is_string($v) && $v && ($value || gettype($value) == 'boolean')) {
@@ -289,7 +283,7 @@ abstract class CustomStructure
                     }
                 }
             }
-            foreach ($this->self->updateField as $k => $v) {
+            foreach ($this->updateField as $k => $v) {
                 $this->addField($ret, $k, $v);
             }
         }
@@ -307,10 +301,10 @@ abstract class CustomStructure
      */
     protected function addField(&$ret, $k, $v)
     {
-        if (in_array($k, $this->self->jsonStrField) && is_array($v)) {
+        if (in_array($k, $this->jsonStrField) && is_array($v)) {
             $ret[$k] = json_encode($v);
-        } elseif (in_array($k, $this->self->splitStrField) && is_array($v)) {
-            $ret[$k] = implode($this->self->splitStr, $v);
+        } elseif (in_array($k, $this->splitStrField) && is_array($v)) {
+            $ret[$k] = implode($this->splitStr, $v);
         } else {
             $ret[$k] = $v;
         }
@@ -324,6 +318,6 @@ abstract class CustomStructure
      */
     public function getArray()
     {
-        return json_decode($this->self->__toString(), true);
+        return json_decode($this->__toString(), true);
     }
 }
