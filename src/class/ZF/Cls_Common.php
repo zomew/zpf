@@ -587,10 +587,8 @@ class Common
                 $ret = $_SERVER['REQUEST_URI'];
                 break;
         }
-        if (preg_match('/^\/[\w\d\.]+(\/.*)$/i', $ret, $m)) {
+        if (preg_match('/^\/[\w\d\-_\.]+(\/.*)$/i', $ret, $m)) {
             $ret = $m[1];
-        } else {
-            $ret = '';
         }
         return $ret;
     }
