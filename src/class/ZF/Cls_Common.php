@@ -700,10 +700,11 @@ class Common
             return true;
         }
         // 如果via信息含有wap则一定是移动设备,部分服务商会屏蔽该信息
-        if (isset($_SERVER['HTTP_VIA'])) {
+        //使用阿里CDN的时候，会一直有VIA导致一直判断为PC端，暂时屏蔽
+        /*if (isset($_SERVER['HTTP_VIA'])) {
             // 找不到为flase,否则为true
             return stristr($_SERVER['HTTP_VIA'], "wap") ? true : false;
-        }
+        }*/
         // 脑残法，判断手机发送的客户端标志,兼容性有待提高
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $clientkeywords = array(
